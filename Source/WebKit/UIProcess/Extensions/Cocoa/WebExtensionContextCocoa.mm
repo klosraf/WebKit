@@ -4673,7 +4673,7 @@ void WebExtensionContext::setSessionStorageAllowedInContentScripts(bool allowed)
     extensionController()->sendToAllProcesses(Messages::WebExtensionContextProxy::SetStorageAccessLevel(allowed), identifier());
 }
 
-size_t WebExtensionContext::quoataForStorageType(WebExtensionDataType storageType)
+size_t WebExtensionContext::quotaForStorageType(WebExtensionDataType storageType)
 {
     switch (storageType) {
     case WebExtensionDataType::Local:
