@@ -1883,6 +1883,7 @@ static Ref<CSSValue> valueForWebkitRubyPosition(RubyPosition position)
         case RubyPosition::Under:
             return CSSValueAfter;
         case RubyPosition::InterCharacter:
+        case RubyPosition::LegacyInterCharacter:
             return CSSValueInterCharacter;
         }
         return CSSValueBefore;

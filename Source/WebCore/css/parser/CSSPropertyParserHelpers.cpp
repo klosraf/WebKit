@@ -1238,6 +1238,15 @@ RefPtr<CSSValue> consumeTextEdge(CSSPropertyID property, CSSParserTokenRange& ra
     return CSSValuePair::create(firstValue.releaseNonNull(), secondValue.releaseNonNull());
 }
 
+RefPtr<CSSValue> consumeWebKitRubyPosition(CSSParserTokenRange& range, const CSSParserContext&)
+{
+    if (range.peek().id() == CSSValueInterCharacter) {
+        consumeIdent(range);
+        return CSSPrimitiveValue::create(CSSValueLegacyInterCharacter);
+    }
+    return consumeIdent(range);
+}
+
 RefPtr<CSSValue> consumeBorderRadiusCorner(CSSParserTokenRange& range, CSSParserMode mode)
 {
     auto parsedValue1 = consumeLengthOrPercent(range, mode, ValueRange::NonNegative);

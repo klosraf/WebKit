@@ -163,6 +163,8 @@ RefPtr<CSSValue> consumeTextUnderlinePosition(CSSParserTokenRange&, const CSSPar
 RefPtr<CSSPrimitiveValue> consumeAnchor(CSSParserTokenRange&, CSSParserMode);
 RefPtr<CSSValue> consumeViewTransitionTypes(CSSParserTokenRange&);
 
+RefPtr<CSSValue> consumeWebKitRubyPosition(CSSParserTokenRange&, const CSSParserContext&);
+
 RefPtr<CSSValue> consumeDeclarationValue(CSSParserTokenRange&, const CSSParserContext&);
 
 // @counter-style descriptor consumers:
