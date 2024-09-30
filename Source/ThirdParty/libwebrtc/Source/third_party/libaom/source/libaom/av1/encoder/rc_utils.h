@@ -145,7 +145,8 @@ static AOM_INLINE int recode_loop_test(AV1_COMP *cpi, int high_limit,
       // Deal with frame undershoot and whether or not we are
       // below the automatically set cq level.
       if (q > oxcf->rc_cfg.cq_level &&
-          rc->projected_frame_size < ((rc->this_frame_target * 7) >> 3)) {
+          rc->projected_frame_size <
+              (((int64_t)rc->this_frame_target * 7) >> 3)) {
         force_recode = 1;
       }
     }
