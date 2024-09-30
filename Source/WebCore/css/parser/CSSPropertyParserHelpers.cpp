@@ -39,6 +39,7 @@
 #include "CSSPropertyParserConsumer+Image.h"
 #include "CSSPropertyParserConsumer+Integer.h"
 #include "CSSPropertyParserConsumer+Length.h"
+#include "CSSPropertyParserConsumer+LengthPercentage.h"
 #include "CSSPropertyParserConsumer+List.h"
 #include "CSSPropertyParserConsumer+Lists.h"
 #include "CSSPropertyParserConsumer+MetaConsumer.h"
@@ -487,13 +488,13 @@ RefPtr<CSSValue> consumeTextTransform(CSSParserTokenRange& range)
 RefPtr<CSSValue> consumeTextIndent(CSSParserTokenRange& range, CSSParserMode mode)
 {
     // [ <length> | <percentage> ] && hanging? && each-line?
-    RefPtr<CSSValue> lengthOrPercentage;
+    RefPtr<CSSValue> lengthPercentage;
     bool eachLine = false;
     bool hanging = false;
     do {
-        if (!lengthOrPercentage) {
-            if (auto textIndent = consumeLengthOrPercent(range, mode, ValueRange::All, UnitlessQuirk::Allow)) {
-                lengthOrPercentage = textIndent;
+        if (!lengthPercentage) {
+            if (auto textIndent = consumeLengthPercentage(range, mode, ValueRange::All, UnitlessQuirk::Allow)) {
+                lengthPercentage = textIndent;
                 continue;
             }
         }
@@ -507,16 +508,16 @@ RefPtr<CSSValue> consumeTextIndent(CSSParserTokenRange& range, CSSParserMode mod
         }
         return nullptr;
     } while (!range.atEnd());
-    if (!lengthOrPercentage)
+    if (!lengthPercentage)
         return nullptr;
 
     if (!hanging && !eachLine)
-        return CSSValueList::createSpaceSeparated(lengthOrPercentage.releaseNonNull());
+        return CSSValueList::createSpaceSeparated(lengthPercentage.releaseNonNull());
     if (hanging && !eachLine)
-        return CSSValueList::createSpaceSeparated(lengthOrPercentage.releaseNonNull(), CSSPrimitiveValue::create(CSSValueHanging));
+        return CSSValueList::createSpaceSeparated(lengthPercentage.releaseNonNull(), CSSPrimitiveValue::create(CSSValueHanging));
     if (!hanging)
-        return CSSValueList::createSpaceSeparated(lengthOrPercentage.releaseNonNull(), CSSPrimitiveValue::create(CSSValueEachLine));
-    return CSSValueList::createSpaceSeparated(lengthOrPercentage.releaseNonNull(),
+        return CSSValueList::createSpaceSeparated(lengthPercentage.releaseNonNull(), CSSPrimitiveValue::create(CSSValueEachLine));
+    return CSSValueList::createSpaceSeparated(lengthPercentage.releaseNonNull(),
         CSSPrimitiveValue::create(CSSValueHanging), CSSPrimitiveValue::create(CSSValueEachLine));
 }
 
@@ -545,17 +546,17 @@ RefPtr<CSSValue> consumeTextUnderlinePosition(CSSParserTokenRange& range, const 
     return nullptr;
 }
 
-static RefPtr<CSSValue> consumeAutoOrLengthOrPercent(CSSParserTokenRange& range, CSSParserMode mode, UnitlessQuirk unitless, AnchorPolicy anchorPolicy = AnchorPolicy::Forbid)
+static RefPtr<CSSValue> consumeAutoOrLengthPercentage(CSSParserTokenRange& range, CSSParserMode mode, UnitlessQuirk unitless, AnchorPolicy anchorPolicy = AnchorPolicy::Forbid)
 {
     if (range.peek().id() == CSSValueAuto)
         return consumeIdent(range);
-    return consumeLengthOrPercent(range, mode, ValueRange::All, unitless, UnitlessZeroQuirk::Allow, NegativePercentagePolicy::Forbid, anchorPolicy);
+    return consumeLengthPercentage(range, mode, ValueRange::All, unitless, UnitlessZeroQuirk::Allow, NegativePercentagePolicy::Forbid, anchorPolicy);
 }
 
 RefPtr<CSSValue> consumeMarginSide(CSSParserTokenRange& range, CSSPropertyID currentShorthand, CSSParserMode mode)
 {
     UnitlessQuirk unitless = currentShorthand != CSSPropertyInset ? UnitlessQuirk::Allow : UnitlessQuirk::Forbid;
-    return consumeAutoOrLengthOrPercent(range, mode, unitless);
+    return consumeAutoOrLengthPercentage(range, mode, unitless);
 }
 
 RefPtr<CSSValue> consumeMarginTrim(CSSParserTokenRange& range)
@@ -586,13 +587,13 @@ RefPtr<CSSValue> consumeSide(CSSParserTokenRange& range, CSSPropertyID currentSh
 {
     UnitlessQuirk unitless = currentShorthand != CSSPropertyInset ? UnitlessQuirk::Allow : UnitlessQuirk::Forbid;
     AnchorPolicy anchorPolicy = context.propertySettings.cssAnchorPositioningEnabled ? AnchorPolicy::Allow : AnchorPolicy::Forbid;
-    return consumeAutoOrLengthOrPercent(range, context.mode, unitless, anchorPolicy);
+    return consumeAutoOrLengthPercentage(range, context.mode, unitless, anchorPolicy);
 }
 
 RefPtr<CSSValue> consumeInsetLogicalStartEnd(CSSParserTokenRange& range, const CSSParserContext& context)
 {
     AnchorPolicy anchorPolicy = context.propertySettings.cssAnchorPositioningEnabled ? AnchorPolicy::Allow : AnchorPolicy::Forbid;
-    return consumeAutoOrLengthOrPercent(range, context.mode, UnitlessQuirk::Forbid, anchorPolicy);
+    return consumeAutoOrLengthPercentage(range, context.mode, UnitlessQuirk::Forbid, anchorPolicy);
 }
 
 static RefPtr<CSSPrimitiveValue> consumeClipComponent(CSSParserTokenRange& range, CSSParserMode mode)
@@ -895,7 +896,7 @@ RefPtr<CSSValue> consumeStrokeDasharray(CSSParserTokenRange& range)
         return consumeIdent(range);
     CSSValueListBuilder dashes;
     do {
-        RefPtr<CSSPrimitiveValue> dash = consumeLengthOrPercent(range, HTMLStandardMode, ValueRange::NonNegative, UnitlessQuirk::Forbid, UnitlessZeroQuirk::Forbid);
+        RefPtr<CSSPrimitiveValue> dash = consumeLengthPercentage(range, HTMLStandardMode, ValueRange::NonNegative, UnitlessQuirk::Forbid, UnitlessZeroQuirk::Forbid);
         if (!dash)
             dash = consumeNumber(range, ValueRange::NonNegative);
         if (!dash || (consumeCommaIncludingWhitespace(range) && range.atEnd()))
@@ -1152,10 +1153,10 @@ RefPtr<CSSValue> consumeWebKitRubyPosition(CSSParserTokenRange& range, const CSS
 
 RefPtr<CSSValue> consumeBorderRadiusCorner(CSSParserTokenRange& range, CSSParserMode mode)
 {
-    auto parsedValue1 = consumeLengthOrPercent(range, mode, ValueRange::NonNegative);
+    auto parsedValue1 = consumeLengthPercentage(range, mode, ValueRange::NonNegative);
     if (!parsedValue1)
         return nullptr;
-    auto parsedValue2 = consumeLengthOrPercent(range, mode, ValueRange::NonNegative);
+    auto parsedValue2 = consumeLengthPercentage(range, mode, ValueRange::NonNegative);
     if (!parsedValue2)
         parsedValue2 = parsedValue1;
     return CSSValuePair::create(parsedValue1.releaseNonNull(), parsedValue2.releaseNonNull());
@@ -1166,7 +1167,7 @@ static RefPtr<CSSPrimitiveValue> consumeShapeRadius(CSSParserTokenRange& args, C
     if (identMatches<CSSValueClosestSide, CSSValueFarthestSide, CSSValueClosestCorner, CSSValueFarthestCorner>(args.peek().id()))
         return consumeIdent(args);
 
-    return consumeLengthOrPercent(args, mode, ValueRange::NonNegative);
+    return consumeLengthPercentage(args, mode, ValueRange::NonNegative);
 }
 
 static RefPtr<CSSCircleValue> consumeBasicShapeCircle(CSSParserTokenRange& args, const CSSParserContext& context)
@@ -1219,10 +1220,10 @@ static RefPtr<CSSPolygonValue> consumeBasicShapePolygon(CSSParserTokenRange& arg
 
     CSSValueListBuilder points;
     do {
-        auto xLength = consumeLengthOrPercent(args, context.mode);
+        auto xLength = consumeLengthPercentage(args, context.mode);
         if (!xLength)
             return nullptr;
-        auto yLength = consumeLengthOrPercent(args, context.mode);
+        auto yLength = consumeLengthPercentage(args, context.mode);
         if (!yLength)
             return nullptr;
         points.append(xLength.releaseNonNull());
@@ -1256,11 +1257,11 @@ static RefPtr<CSSPathValue> consumeBasicShapePath(CSSParserTokenRange& args, Opt
 
 static RefPtr<CSSValuePair> consumeCoordinatePair(CSSParserTokenRange& range, const CSSParserContext& context)
 {
-    auto xDimension = consumeLengthOrPercent(range, context.mode);
+    auto xDimension = consumeLengthPercentage(range, context.mode);
     if (!xDimension)
         return nullptr;
 
-    auto yDimension = consumeLengthOrPercent(range, context.mode);
+    auto yDimension = consumeLengthPercentage(range, context.mode);
     if (!yDimension)
         return nullptr;
 
@@ -1323,7 +1324,7 @@ static RefPtr<CSSValue> consumeShapeCommand(CSSParserTokenRange& range, const CS
         if (!affinityValue)
             return nullptr;
 
-        auto length = consumeLengthOrPercent(range, context.mode);
+        auto length = consumeLengthPercentage(range, context.mode);
         if (!length)
             return nullptr;
 
@@ -1388,9 +1389,9 @@ static RefPtr<CSSValue> consumeShapeCommand(CSSParserTokenRange& range, const CS
         if (!consumeIdent<CSSValueOf>(range))
             return nullptr;
 
-        auto radiusX = consumeLengthOrPercent(range, context.mode);
+        auto radiusX = consumeLengthPercentage(range, context.mode);
         auto radiusY = radiusX;
-        if (auto value = consumeLengthOrPercent(range, context.mode))
+        if (auto value = consumeLengthPercentage(range, context.mode))
             radiusY = value;
 
         std::optional<CSSValueID> sweep;
@@ -1490,7 +1491,7 @@ bool consumeRadii(std::array<RefPtr<CSSValue>, 4>& horizontalRadii, std::array<R
 {
     unsigned i = 0;
     for (; i < 4 && !range.atEnd() && range.peek().type() != DelimiterToken; ++i) {
-        horizontalRadii[i] = consumeLengthOrPercent(range, mode, ValueRange::NonNegative);
+        horizontalRadii[i] = consumeLengthPercentage(range, mode, ValueRange::NonNegative);
         if (!horizontalRadii[i])
             return false;
     }
@@ -1511,7 +1512,7 @@ bool consumeRadii(std::array<RefPtr<CSSValue>, 4>& horizontalRadii, std::array<R
         if (!consumeSlashIncludingWhitespace(range))
             return false;
         for (i = 0; i < 4 && !range.atEnd(); ++i) {
-            verticalRadii[i] = consumeLengthOrPercent(range, mode, ValueRange::NonNegative);
+            verticalRadii[i] = consumeLengthPercentage(range, mode, ValueRange::NonNegative);
             if (!verticalRadii[i])
                 return false;
         }
@@ -1540,7 +1541,7 @@ static RefPtr<CSSRectShapeValue> consumeBasicShapeRect(CSSParserTokenRange& args
 {
     std::array<RefPtr<CSSValue>, 4> offsets;
     for (auto& offset : offsets) {
-        offset = consumeAutoOrLengthOrPercent(args, context.mode, UnitlessQuirk::Forbid);
+        offset = consumeAutoOrLengthPercentage(args, context.mode, UnitlessQuirk::Forbid);
 
         if (!offset)
             return nullptr;
@@ -1556,14 +1557,14 @@ static RefPtr<CSSXywhValue> consumeBasicShapeXywh(CSSParserTokenRange& args, con
 {
     std::array<RefPtr<CSSValue>, 2> insets;
     for (auto& inset : insets) {
-        inset = consumeLengthOrPercent(args, context.mode);
+        inset = consumeLengthPercentage(args, context.mode);
         if (!inset)
             return nullptr;
     }
 
     std::array<RefPtr<CSSValue>, 2> dimensions;
     for (auto& dimension : dimensions) {
-        dimension = consumeLengthOrPercent(args, context.mode, ValueRange::NonNegative);
+        dimension = consumeLengthPercentage(args, context.mode, ValueRange::NonNegative);
         if (!dimension)
             return nullptr;
     }
@@ -1578,7 +1579,7 @@ static RefPtr<CSSInsetShapeValue> consumeBasicShapeInset(CSSParserTokenRange& ar
 {
     std::array<RefPtr<CSSValue>, 4> sides;
     for (unsigned i = 0; i < 4; ++i) {
-        sides[i] = consumeLengthOrPercent(args, context.mode);
+        sides[i] = consumeLengthPercentage(args, context.mode);
         if (!sides[i])
             break;
     }
@@ -1821,7 +1822,7 @@ RefPtr<CSSValue> consumeBorderImageWidth(CSSPropertyID property, CSSParserTokenR
         value = consumeNumber(range, ValueRange::NonNegative);
         if (value)
             continue;
-        if (auto numericValue = consumeLengthOrPercent(range, HTMLStandardMode, ValueRange::NonNegative, UnitlessQuirk::Forbid)) {
+        if (auto numericValue = consumeLengthPercentage(range, HTMLStandardMode, ValueRange::NonNegative, UnitlessQuirk::Forbid)) {
             if (numericValue->isLength())
                 hasLength = true;
             value = numericValue;
@@ -1895,7 +1896,7 @@ RefPtr<CSSValue> consumeReflect(CSSParserTokenRange& range, const CSSParserConte
     if (range.atEnd())
         offset = CSSPrimitiveValue::create(0, CSSUnitType::CSS_PX);
     else {
-        offset = consumeLengthOrPercent(range, context.mode);
+        offset = consumeLengthPercentage(range, context.mode);
         if (!offset)
             return nullptr;
     }
@@ -1927,7 +1928,7 @@ template<CSSPropertyID property> RefPtr<CSSValue> consumeBackgroundSize(CSSParse
     bool shouldCoalesce = true;
     RefPtr<CSSPrimitiveValue> horizontal = consumeIdent<CSSValueAuto>(range);
     if (!horizontal) {
-        horizontal = consumeLengthOrPercent(range, mode, ValueRange::NonNegative, UnitlessQuirk::Forbid);
+        horizontal = consumeLengthPercentage(range, mode, ValueRange::NonNegative, UnitlessQuirk::Forbid);
         if (!horizontal)
             return nullptr;
         shouldCoalesce = false;
@@ -1937,7 +1938,7 @@ template<CSSPropertyID property> RefPtr<CSSValue> consumeBackgroundSize(CSSParse
     if (!range.atEnd()) {
         vertical = consumeIdent<CSSValueAuto>(range);
         if (!vertical)
-            vertical = consumeLengthOrPercent(range, mode, ValueRange::NonNegative, UnitlessQuirk::Forbid);
+            vertical = consumeLengthPercentage(range, mode, ValueRange::NonNegative, UnitlessQuirk::Forbid);
     }
     if (!vertical) {
         if constexpr (property == CSSPropertyWebkitBackgroundSize) {
@@ -2441,7 +2442,7 @@ RefPtr<CSSPrimitiveValue> consumeAnchor(CSSParserTokenRange& range, CSSParserMod
     if (!consumeCommaIncludingWhitespace(args))
         return nullptr;
 
-    auto fallback = consumeLengthOrPercent(args, mode, ValueRange::All, UnitlessQuirk::Forbid, UnitlessZeroQuirk::Forbid, NegativePercentagePolicy::Allow, AnchorPolicy::Allow);
+    auto fallback = consumeLengthPercentage(args, mode, ValueRange::All, UnitlessQuirk::Forbid, UnitlessZeroQuirk::Forbid, NegativePercentagePolicy::Allow, AnchorPolicy::Allow);
     if (!fallback || args.size())
         return nullptr;
 

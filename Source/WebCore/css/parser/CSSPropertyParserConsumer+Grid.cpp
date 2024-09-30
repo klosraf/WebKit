@@ -37,9 +37,10 @@
 #include "CSSPrimitiveValue.h"
 #include "CSSPropertyParserConsumer+Ident.h"
 #include "CSSPropertyParserConsumer+Integer.h"
-#include "CSSPropertyParserConsumer+Length.h"
+#include "CSSPropertyParserConsumer+LengthPercentage.h"
 #include "CSSSubgridValue.h"
 #include "CSSValueList.h"
+#include "CSSValuePool.h"
 #include "GridArea.h"
 #include <wtf/Vector.h>
 #include <wtf/text/StringView.h>
@@ -233,14 +234,14 @@ static RefPtr<CSSPrimitiveValue> consumeGridBreadth(CSSParserTokenRange& range, 
             return nullptr;
         return CSSPrimitiveValue::create(range.consumeIncludingWhitespace().numericValue(), CSSUnitType::CSS_FR);
     }
-    return consumeLengthOrPercent(range, context.mode, ValueRange::NonNegative);
+    return consumeLengthPercentage(range, context.mode, ValueRange::NonNegative);
 }
 
 static RefPtr<CSSValue> consumeFitContent(CSSParserTokenRange& range, const CSSParserContext& context)
 {
     CSSParserTokenRange rangeCopy = range;
     CSSParserTokenRange args = consumeFunction(rangeCopy);
-    auto length = consumeLengthOrPercent(args, context.mode, ValueRange::NonNegative, UnitlessQuirk::Allow);
+    auto length = consumeLengthPercentage(args, context.mode, ValueRange::NonNegative, UnitlessQuirk::Allow);
     if (!length || !args.atEnd())
         return nullptr;
     range = rangeCopy;
