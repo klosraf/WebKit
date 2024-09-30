@@ -4450,7 +4450,7 @@ void WebPage::getSelectionAsWebArchiveData(CompletionHandler<void(const std::opt
     callback(dataBuffer);
 }
 
-void WebPage::copyLinkToHighlight()
+void WebPage::copyLinkWithHighlight()
 {
     auto url = m_page->fragmentDirectiveURLForSelectedText();
     RefPtr frame = m_page->checkedFocusController()->focusedOrMainFrame();
