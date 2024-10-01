@@ -32,7 +32,7 @@
 #include "CSSPropertyParserConsumer+LengthDefinitions.h"
 #include "CSSPropertyParserConsumer+NoneDefinitions.h"
 #include "CSSPropertyParserConsumer+NumberDefinitions.h"
-#include "CSSPropertyParserConsumer+PercentDefinitions.h"
+#include "CSSPropertyParserConsumer+PercentageDefinitions.h"
 #include "CSSPropertyParserConsumer+ResolutionDefinitions.h"
 #include "CSSPropertyParserConsumer+TimeDefinitions.h"
 #include "CSSPropertyParserConsumer+UnevaluatedCalc.h"
@@ -55,7 +55,7 @@ std::optional<NumberRaw> RawResolverBase::resolve(NumberRaw value, const CSSCalc
     return value;
 }
 
-std::optional<PercentRaw> RawResolverBase::resolve(PercentRaw value, const CSSCalcSymbolTable&, CSSPropertyParserOptions)
+std::optional<PercentageRaw> RawResolverBase::resolve(PercentageRaw value, const CSSCalcSymbolTable&, CSSPropertyParserOptions)
 {
     return value;
 }
@@ -95,7 +95,7 @@ std::optional<NumberRaw> RawResolverBase::resolve(UnevaluatedCalc<NumberRaw> val
     return validatedRange(evaluateCalcNoConversionDataRequired(value, symbolTable), options);
 }
 
-std::optional<PercentRaw> RawResolverBase::resolve(UnevaluatedCalc<PercentRaw> value, const CSSCalcSymbolTable& symbolTable, CSSPropertyParserOptions options)
+std::optional<PercentageRaw> RawResolverBase::resolve(UnevaluatedCalc<PercentageRaw> value, const CSSCalcSymbolTable& symbolTable, CSSPropertyParserOptions options)
 {
     return validatedRange(evaluateCalcNoConversionDataRequired(value, symbolTable), options);
 }

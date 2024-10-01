@@ -346,7 +346,7 @@ bool Length::isCalculatedEqual(const Length& other) const
 static Calculation::Child lengthCalculation(const Length& length)
 {
     if (length.isPercent())
-        return Calculation::percent(length.value());
+        return Calculation::percentage(length.value());
 
     if (length.isCalculated()) {
         auto tree = length.calculationValue().copyTree();
@@ -362,7 +362,7 @@ static Length makeLength(Calculation::Child&& root)
     // FIXME: Value range should be passed in.
 
     // NOTE: category is always `PercentLength` as late resolved `Length` values defined by percentages is the only reason calculation value is needed by `Length`.
-    return Length(CalculationValue::create(Calculation::Tree { .root = WTFMove(root), .category = Calculation::Category::PercentLength, .range = ValueRange::All }));
+    return Length(CalculationValue::create(Calculation::Tree { .root = WTFMove(root), .category = Calculation::Category::LengthPercentage, .range = ValueRange::All }));
 }
 
 Length convertTo100PercentMinusLength(const Length& length)
@@ -372,7 +372,7 @@ Length convertTo100PercentMinusLength(const Length& length)
         return Length(100 - length.value(), LengthType::Percent);
 
     // Otherwise, turn this into a calc expression: calc(100% - length)
-    return makeLength(Calculation::subtract(Calculation::percent(100), lengthCalculation(length)));
+    return makeLength(Calculation::subtract(Calculation::percentage(100), lengthCalculation(length)));
 }
 
 Length convertTo100PercentMinusLengthSum(const Length& a, const Length& b)
@@ -386,7 +386,7 @@ Length convertTo100PercentMinusLengthSum(const Length& a, const Length& b)
         // And if `b` is a percent, we can avoid the `calc` altogether.
         if (b.isPercent())
             return Length(100 - b.value(), LengthType::Percent);
-        return makeLength(Calculation::subtract(Calculation::percent(100), lengthCalculation(b)));
+        return makeLength(Calculation::subtract(Calculation::percentage(100), lengthCalculation(b)));
     }
 
     // If just `b` is 0, we can just consider the case of `calc(100% - a)`.
@@ -394,7 +394,7 @@ Length convertTo100PercentMinusLengthSum(const Length& a, const Length& b)
         // And if `a` is a percent, we can avoid the `calc` altogether.
         if (a.isPercent())
             return Length(100 - a.value(), LengthType::Percent);
-        return makeLength(Calculation::subtract(Calculation::percent(100), lengthCalculation(a)));
+        return makeLength(Calculation::subtract(Calculation::percentage(100), lengthCalculation(a)));
     }
 
     // If both and `a` and `b` are percentages, we can avoid the `calc` altogether.
@@ -402,7 +402,7 @@ Length convertTo100PercentMinusLengthSum(const Length& a, const Length& b)
         return Length(100 - (a.value() + b.value()), LengthType::Percent);
 
     // Otherwise, turn this into a calc expression: calc(100% - (a + b))
-    return makeLength(Calculation::subtract(Calculation::percent(100), Calculation::add(lengthCalculation(a), lengthCalculation(b))));
+    return makeLength(Calculation::subtract(Calculation::percentage(100), Calculation::add(lengthCalculation(a), lengthCalculation(b))));
 }
 
 static Length blendMixedTypes(const Length& from, const Length& to, const BlendingContext& context)
