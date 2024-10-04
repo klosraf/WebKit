@@ -1601,8 +1601,8 @@ class UploadStaticAnalyzerResults(UploadTestResults):
     haltOnFailure = True
 
 
-class ScanBuildSmartPointer(steps.ShellSequence, ShellMixin):
-    name = "scan-build-smart-pointer"
+class ScanBuild(steps.ShellSequence, ShellMixin):
+    name = "scan-build"
     description = ["scanning with static analyzer"]
     descriptionDone = ["scanned with static analyzer"]
     flunkOnFailure = True
@@ -1659,7 +1659,7 @@ class ScanBuildSmartPointer(steps.ShellSequence, ShellMixin):
         ]
 
         if rc == SUCCESS:
-            steps_to_add += [ParseStaticAnalyzerResults(), CompareStaticAnalyzerResults(), ArchiveStaticAnalyzerResults(), UploadStaticAnalyzerResults(), ExtractStaticAnalyzerTestResults()]
+            steps_to_add += [ParseStaticAnalyzerResults(), FindUnexpectedStaticAnalyzerResults(), ArchiveStaticAnalyzerResults(), UploadStaticAnalyzerResults(), ExtractStaticAnalyzerTestResults(), DisplaySaferCPPResults()]
         self.build.addStepsAfterCurrentStep(steps_to_add)
 
         defer.returnValue(rc)
@@ -1776,20 +1776,34 @@ class CompareStaticAnalyzerResults(shell.ShellCommandNewStyle):
         return {u'step': status}
 
 
-class DisplayUnexpectedResults(buildstep.BuildStep, AddToLogMixin):
-    name = 'display-unexpected-results'
+class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
+    name = 'display-safer-cpp-results'
 
     @defer.inlineCallbacks
     def run(self):
-        result_directory = f"public_html/results/{self.getProperty('buildername')}/{self.getProperty('archive_revision')} ({self.getProperty('buildnumber')})"
-        unexpected_results_json = os.path.join(result_directory, SCAN_BUILD_OUTPUT_DIR, 'unexpected_results.json')
-        with open(unexpected_results_json) as f:
-            unexpected_results_data = json.load(f)
-        yield self.getFilesPerProject(unexpected_results_data, 'passes')
-        yield self.getFilesPerProject(unexpected_results_data, 'failures')
+        self.resultDirectory = f"public_html/results/{self.getProperty('buildername')}/{self.getProperty('archive_revision')} ({self.getProperty('buildnumber')})"
+        self.zipFile = self.resultDirectory + '.zip'
+
+        unexpected_results_data = self.loadResultsData(os.path.join(self.resultDirectory, SCAN_BUILD_OUTPUT_DIR, 'unexpected_results.json'))
+        is_log = yield self.getFilesPerProject(unexpected_results_data, 'passes')
+        is_log += yield self.getFilesPerProject(unexpected_results_data, 'failures')
+        if not is_log:
+            yield self._addToLog('stdio', 'No unexpected results.\n')
+
+        self.addURL("View full static analyzer results", self.resultDirectoryURL() + SCAN_BUILD_OUTPUT_DIR + "/results.html")
+        self.addURL("Download full static analyzer results", self.resultDownloadURL())
         if self.getProperty('unexpected_failing_files', 0) or self.getProperty('unexpected_passing_files', 0):
+            self.addURL("View unexpected static analyzer results", self.resultDirectoryURL() + SCAN_BUILD_OUTPUT_DIR + "/unexpected-results.html")
+        if self.getProperty('unexpected_failing_files', 0):
             return defer.returnValue(FAILURE)
+        elif self.getProperty('unexpected_passing_files', 0):
+            return defer.returnValue(WARNINGS)
         return defer.returnValue(SUCCESS)
+
+    def loadResultsData(self, unexpected_results_path):
+        with open(unexpected_results_path) as f:
+            unexpected_results_data = json.load(f)
+        return unexpected_results_data
 
     @defer.inlineCallbacks
     def getFilesPerProject(self, unexpected_results_data, type):
@@ -1803,17 +1817,31 @@ class DisplayUnexpectedResults(buildstep.BuildStep, AddToLogMixin):
                 yield self._addToLog(f'{project}-unexpected-{type}', log_content)
 
     def getResultSummary(self):
-        if self.results != SUCCESS:
-            return super().getResultSummary()
-        num_failures = self.getProperty('unexpected_failing_files', 0)
-        num_passes = self.getProperty('unexpected_passing_files', 0)
-        return {'step': f'Unexpected failing files: {num_failures} Unexpected passing files: {num_passes}'}
+        summary = ''
+        if self.results == SUCCESS:
+            summary = 'No unexpected results'
+        else:
+            num_failures = self.getProperty('unexpected_failing_files', 0)
+            num_passes = self.getProperty('unexpected_passing_files', 0)
+            if num_failures:
+                summary += f'Unexpected failing files: {num_failures} '
+            if num_passes:
+                summary += f'Unexpected passing files: {num_passes}'
+        self.build.buildFinished([summary], self.results)
+        return {'step': summary}
+
+    def resultDirectoryURL(self):
+        self.setProperty('result_directory', self.resultDirectory)
+        return self.resultDirectory.replace('public_html/', '/') + '/'
+
+    def resultDownloadURL(self):
+        return self.zipFile.replace('public_html/', '')
 
 
-class UpdateSmartPointerBaseline(steps.ShellSequence, ShellMixin):
-    name = 'update-smart-pointer-baseline'
-    description = ['updating smart pointer baseline']
-    descriptionDone = ['updated smart pointer baseline']
+class UpdateSaferCPPBaseline(steps.ShellSequence, ShellMixin):
+    name = 'update-safer-cpp-baseline'
+    description = ['updating safer cpp baseline']
+    descriptionDone = ['updated safer cpp baseline']
 
     def run(self):
         new_dir = f"smart-pointer-result-archive/{self.getProperty('buildnumber')}"

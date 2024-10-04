@@ -78,6 +78,7 @@ MSG_FOR_EXCESSIVE_LOGS = f'Stopped due to excessive logging, limit: {THRESHOLD_F
 SCAN_BUILD_OUTPUT_DIR = 'scan-build-output'
 LLVM_DIR = 'llvm-project'
 STATIC_ANALYSIS_ARCHIVE_PATH = '/tmp/static-analysis.zip'
+LLVM_REVISION = '9d9287b4d5a2554b195074ae93e48fcd87178554'
 
 if CURRENT_HOSTNAME in EWS_BUILD_HOSTNAMES:
     CURRENT_HOSTNAME = 'ews-build.webkit.org'
@@ -6992,9 +6993,9 @@ class InstallNinja(shell.ShellCommandNewStyle, ShellMixin):
         return {u'step': self.summary}
 
 
-# FIXME: Share smart pointer steps with build-webkit-org since they have a lot of similarities
-class ScanBuildSmartPointer(steps.ShellSequence, ShellMixin):
-    name = "scan-build-smart-pointer"
+# FIXME: Share static analyzer steps with build-webkit-org since they have a lot of similarities
+class ScanBuild(steps.ShellSequence, ShellMixin):
+    name = "scan-build"
     description = ["scanning with static analyzer"]
     descriptionDone = ["scanned with static analyzer"]
     flunkOnFailure = True
@@ -7068,8 +7069,8 @@ class ScanBuildSmartPointer(steps.ShellSequence, ShellMixin):
         return {'step': status}
 
 
-class ScanBuildSmartPointerWithoutChange(ScanBuildSmartPointer):
-    name = 'scan-build-smart-pointer-without-change'
+class ScanBuildWithoutChange(ScanBuild):
+    name = 'scan-build-without-change'
     output_directory = SCAN_BUILD_OUTPUT_DIR + '-baseline'
 
     def addResultsSteps(self):
@@ -7164,10 +7165,10 @@ class FindUnexpectedStaticAnalyzerResults(shell.ShellCommandNewStyle):
         unexpected_results = self.getProperty('unexpected_failing_files', 0) or self.getProperty('unexpected_new_issues', 0) or self.getProperty('unexpected_passing_files', 0)
         if self.expectations and unexpected_results:
             # If there are unexpected results, rebuild without changes to verify causation
-            self.build.addStepsAfterCurrentStep([RevertAppliedChanges(exclude=['new*', 'scan-build-output*']), ScanBuildSmartPointerWithoutChange()])
+            self.build.addStepsAfterCurrentStep([RevertAppliedChanges(exclude=['new*', 'scan-build-output*']), ScanBuildWithoutChange()])
         elif unexpected_results:
             # Only save the results if there are failures and it is not the first run
-            self.build.addStepsAfterCurrentStep([ArchiveStaticAnalyzerResults(), UploadStaticAnalyzerResults(), ExtractStaticAnalyzerTestResults(), DisplaySmartPointerResults()])
+            self.build.addStepsAfterCurrentStep([ArchiveStaticAnalyzerResults(), UploadStaticAnalyzerResults(), ExtractStaticAnalyzerTestResults(), DisplaySaferCPPResults()])
         return defer.returnValue(rc)
 
     def createResultMessage(self):
@@ -7205,8 +7206,8 @@ class FindUnexpectedStaticAnalyzerResults(shell.ShellCommandNewStyle):
         return {u'step': status}
 
 
-class DisplaySmartPointerResults(buildstep.BuildStep, AddToLogMixin):
-    name = 'display-smart-pointer-results'
+class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
+    name = 'display-safer-cpp-results'
     resultDirectory = ''
     NUM_TO_DISPLAY = 10
 
@@ -7274,7 +7275,7 @@ class DisplaySmartPointerResults(buildstep.BuildStep, AddToLogMixin):
 
         if num_failures:
             pluralSuffix = 's' if num_issues > 1 else ''
-            comment = f"Smart Pointer Build {formatted_build_link}: Found [{num_issues} new failure{pluralSuffix}]({results_link}), blocking PR #{self.getProperty('github.number')}.\n"
+            comment = f"Safer CPP Build {formatted_build_link}: Found [{num_issues} new failure{pluralSuffix}]({results_link}), blocking PR #{self.getProperty('github.number')}.\n"
             comment += 'Please address these issues before landing. See [WebKit Guidelines for Safer C++ Programming](https://github.com/WebKit/WebKit/wiki/Safer-CPP-Guidelines).\n(cc @rniwa)'
             self.setProperty('comment_text', comment)
             self.build.addStepsAfterCurrentStep([LeaveComment(), SetCommitQueueMinusFlagOnPatch(), BlockPullRequest()])
@@ -7290,8 +7291,8 @@ class DisplaySmartPointerResults(buildstep.BuildStep, AddToLogMixin):
         elif num_passes:
             # FIXME: Add link to unexpected passes file
             pluralSuffix = 's' if num_passes > 1 else ''
-            comment = f'Smart Pointer Build {formatted_build_link}: Found {num_passes} fixed file{pluralSuffix}!\n'
-            comment += 'Please update expectations using `smart-pointer-tool --update-expectations` before landing.'
+            comment = f'Safer CPP Build {formatted_build_link}: Found {num_passes} fixed file{pluralSuffix}!\n'
+            comment += 'Please update expectations using `update-safer-cpp-expectations --remove-expected-failures` before landing.'
             self.setProperty('comment_text', comment)
             self.build.addStepsAfterCurrentStep([LeaveComment()])
             results_summary = f'Found {num_passes} fixed file{pluralSuffix}: {passing_files}'

@@ -184,6 +184,11 @@
                   "additionalArguments": ["--no-retry-failures"],
                   "workernames": ["bot611"]
                   },
+                  {
+                    "name": "Apple-Sonoma-Safer-CPP-Checks", "factory": "SaferCPPStaticAnalyzerFactory",
+                    "platform": "mac-sonoma", "configuration": "release", "architectures": ["arm64"],
+                    "workernames": ["bot600"]
+                  },
                   { "name": "Apple-Sonoma-AppleSilicon-Release-Test262-Tests", "factory": "Test262Factory",
                   "platform": "mac-sonoma", "configuration": "release", "architectures": ["x86_64", "arm64"],
                   "workernames": ["bot165"]
@@ -719,7 +724,7 @@
                   },
 
                   { "type": "PlatformSpecificScheduler", "platform": "mac-sonoma", "branch": "main", "treeStableTimer": 45.0,
-                  "builderNames": ["Apple-Sonoma-Release-Build", "Apple-Sonoma-Debug-Build", "Apple-Sonoma-LLINT-CLoop-BuildAndTest", "Apple-Sonoma-Smart-Pointer-Static-Analyzer-Build"]
+                  "builderNames": ["Apple-Sonoma-Release-Build", "Apple-Sonoma-Debug-Build", "Apple-Sonoma-LLINT-CLoop-BuildAndTest", "Apple-Sonoma-Safer-CPP-Checks"]
                   },
                   { "type": "Triggerable", "name": "sonoma-release-tests-wk1",
                   "builderNames": ["Apple-Sonoma-Release-WK1-Tests"]

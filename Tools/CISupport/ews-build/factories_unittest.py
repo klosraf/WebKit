@@ -308,7 +308,7 @@ class TestExpectedBuildSteps(unittest.TestCase):
             'print-clang-version',
             'checkout-pull-request',
             'kill-old-processes',
-            'scan-build-smart-pointer'
+            'scan-build'
         ],
         'macOS-Release-WK2-Stress-Tests-EWS': [
             'configure-build',
