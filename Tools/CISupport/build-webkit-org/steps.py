@@ -1807,14 +1807,17 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
 
     @defer.inlineCallbacks
     def getFilesPerProject(self, unexpected_results_data, type):
+        is_log = 0
         for project, data in unexpected_results_data[type].items():
             log_content = ''
             for checker, files in data.items():
                 if files:
-                    log_content += f'\n\n=> {checker}\n\n'
-                    log_content += '\n'.join(files)
+                    file_list = '\n'.join((sorted(files)))
+                    log_content += f'\n\n=> {checker}\n\n{file_list}\n\n'
             if log_content:
                 yield self._addToLog(f'{project}-unexpected-{type}', log_content)
+                is_log += 1
+        return defer.returnValue(is_log)
 
     def getResultSummary(self):
         summary = ''

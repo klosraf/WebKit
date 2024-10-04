@@ -240,7 +240,7 @@
                   "workernames": ["bot178"]
                   },
                   {
-                  "name": "Apple-Sonoma-Smart-Pointer-Static-Analyzer-Build", "factory": "SmartPointerStaticAnalyzerFactory",
+                  "name": "Apple-Sonoma-Safer-CPP-Checks", "factory": "SaferCPPStaticAnalyzerFactory",
                   "platform": "mac-sonoma", "configuration": "debug", "architectures": ["arm64"],
                   "workernames": ["bot600"]
                   },
