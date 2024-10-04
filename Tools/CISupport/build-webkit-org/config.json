@@ -239,11 +239,6 @@
                   "platform": "mac-sonoma", "configuration": "debug", "architectures": ["x86_64"],
                   "workernames": ["bot178"]
                   },
-                  {
-                  "name": "Apple-Sonoma-Safer-CPP-Checks", "factory": "SaferCPPStaticAnalyzerFactory",
-                  "platform": "mac-sonoma", "configuration": "debug", "architectures": ["arm64"],
-                  "workernames": ["bot600"]
-                  },
                   { "name": "Apple-Ventura-Release-Build", "factory": "BuildFactory",
                   "platform": "mac-ventura", "configuration": "release", "architectures": ["x86_64", "arm64"],
                   "triggers": [
