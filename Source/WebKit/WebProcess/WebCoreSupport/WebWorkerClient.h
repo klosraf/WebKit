@@ -52,9 +52,9 @@ public:
     // happen on the worker.
     // Any details needed from the page must be copied at this
     // point, but can't hold references to any main-thread objects.
-    static UniqueRef<WebWorkerClient> create(WebCore::Page&, SerialFunctionDispatcher&);
+    static UniqueRef<WebWorkerClient> create(WebCore::Page&, WebCore::WorkerOrWorkletThread&);
 
-    UniqueRef<WorkerClient> createNestedWorkerClient(SerialFunctionDispatcher&) override;
+    UniqueRef<WorkerClient> createNestedWorkerClient(WebCore::WorkerOrWorkletThread&) override;
 
     WebCore::PlatformDisplayID displayID() const final;
 
@@ -69,8 +69,9 @@ public:
 #endif
 
 protected:
-    WebWorkerClient(SerialFunctionDispatcher&, WebCore::PlatformDisplayID);
-    SerialFunctionDispatcher& m_dispatcher;
+    WebWorkerClient(WebCore::WorkerOrWorkletThread&, WebCore::PlatformDisplayID);
+
+    WebCore::WorkerOrWorkletThread& m_dispatcher;
     const WebCore::PlatformDisplayID m_displayID;
 };
 

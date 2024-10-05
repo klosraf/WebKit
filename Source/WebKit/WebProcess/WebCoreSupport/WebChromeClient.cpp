@@ -989,7 +989,7 @@ RefPtr<ImageBuffer> WebChromeClient::sinkIntoImageBuffer(std::unique_ptr<Seriali
 }
 #endif
 
-std::unique_ptr<WebCore::WorkerClient> WebChromeClient::createWorkerClient(SerialFunctionDispatcher& dispatcher)
+std::unique_ptr<WebCore::WorkerClient> WebChromeClient::createWorkerClient(WorkerOrWorkletThread& dispatcher)
 {
     return WebWorkerClient::create(*protectedPage()->corePage(), dispatcher).moveToUniquePtr();
 }

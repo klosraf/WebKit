@@ -300,7 +300,7 @@ public:
     // the new cache.
     virtual void reachedApplicationCacheOriginQuota(SecurityOrigin&, int64_t) { }
 
-    virtual std::unique_ptr<WorkerClient> createWorkerClient(SerialFunctionDispatcher&) { return nullptr; }
+    virtual std::unique_ptr<WorkerClient> createWorkerClient(WorkerOrWorkletThread&) { return nullptr; }
 
 #if ENABLE(IOS_TOUCH_EVENTS)
     virtual void didPreventDefaultForEvent() = 0;
