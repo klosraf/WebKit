@@ -1341,7 +1341,7 @@ inline GridPosition BuilderConverter::createGridPosition(BuilderState& builderSt
     auto gridLineName = uncheckedGridLineName && uncheckedGridLineName->isCustomIdent() ? uncheckedGridLineName->stringValue() : String();
 
     if (uncheckedSpanValue && uncheckedSpanValue->valueID() == CSSValueSpan)
-        position.setSpanPosition(gridLineNumber ? gridLineNumber : 1, gridLineName);
+        position.setSpanPosition(gridLineNumber > 0 ? gridLineNumber : 1, gridLineName);
     else
         position.setExplicitPosition(gridLineNumber, gridLineName);
 
