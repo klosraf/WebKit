@@ -1162,7 +1162,7 @@ ResourceErrorOr<CachedResourceHandle<CachedResource>> CachedResourceLoader::requ
             && !m_documentLoader->advancedPrivacyProtections().contains(AdvancedPrivacyProtections::HTTPSOnlyExplicitlyBypassedForDomain)
             && !frame->loader().isHTTPFallbackInProgress()
             && !(committedDocumentURL.protocolIs("http"_s) && request.resourceRequest().isSameSite());
-        if (!madeHTTPS && !request.resourceRequest().url().protocolIs("https"_s) && type == CachedResource::Type::MainResource && isHTTPSOnlyActive)
+        if (!madeHTTPS && !LegacySchemeRegistry::shouldTreatURLSchemeAsSecure(request.resourceRequest().url().protocol()) && type == CachedResource::Type::MainResource && isHTTPSOnlyActive)
             return makeUnexpected(protectedDocumentLoader()->checkedFrameLoader()->client().httpNavigationWithHTTPSOnlyError(request.resourceRequest()));
 
         if (madeHTTPS
