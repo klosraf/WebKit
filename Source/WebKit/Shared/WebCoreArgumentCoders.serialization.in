@@ -7923,8 +7923,6 @@ header: <WebCore/TextAttachmentForSerialization.h>
 [CustomHeader] struct WebCore::MultiRepresentationHEICAttachmentData {
     String identifier;
     String description;
-    String credit;
-    String digitalSourceType;
     Vector<WebCore::MultiRepresentationHEICAttachmentSingleImage> images;
     [NotSerialized] RetainPtr<CFDataRef> data;
 }
