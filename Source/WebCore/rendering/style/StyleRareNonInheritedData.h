@@ -50,6 +50,7 @@
 #include "TouchAction.h"
 #include "TranslateTransformOperation.h"
 #include "ViewTimeline.h"
+#include "ViewTransitionName.h"
 #include "WillChangeData.h"
 #include <memory>
 #include <wtf/DataRef.h>
@@ -160,7 +161,7 @@ public:
     Vector<Style::ScopedName> containerNames;
 
     Vector<Style::ScopedName> viewTransitionClasses;
-    std::optional<Style::ScopedName> viewTransitionName;
+    Style::ViewTransitionName viewTransitionName;
 
     GapLength columnGap;
     GapLength rowGap;

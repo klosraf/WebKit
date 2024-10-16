@@ -35,7 +35,6 @@ class CSSValue;
 namespace CSSPropertyParserHelpers {
 
 RefPtr<CSSValue> consumeViewTransitionClass(CSSParserTokenRange&);
-RefPtr<CSSValue> consumeViewTransitionName(CSSParserTokenRange&);
 
 // For @view-transition descriptor
 RefPtr<CSSValue> consumeViewTransitionTypes(CSSParserTokenRange&);
