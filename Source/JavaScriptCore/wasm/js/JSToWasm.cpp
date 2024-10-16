@@ -574,7 +574,7 @@ std::unique_ptr<InternalFunction> createJSToWasmWrapper(CCallHelpers& jit, JSEnt
         unlinkedWasmToWasmCalls->append({ linkBuffer.locationOfNearCall<WasmEntryPtrTag>(call), functionIndexSpace, { } });
     });
 
-    // Restore stack pointer after call
+    // Restore stack pointer after call. We want to do this before marshalling results since stack results are stored at the top of the frame we created.
     jit.addPtr(MacroAssembler::TrustedImm32(-static_cast<int32_t>(totalFrameSize)), MacroAssembler::framePointerRegister, MacroAssembler::stackPointerRegister);
 
     CCallHelpers::JumpList exceptionChecks;

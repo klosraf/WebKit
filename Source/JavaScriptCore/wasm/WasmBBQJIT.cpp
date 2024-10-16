@@ -4151,12 +4151,12 @@ PartialResult WARN_UNUSED_RETURN BBQJIT::addCall(unsigned functionIndex, const T
         });
     }
 
-    // Push return value(s) onto the expression stack
-    returnValuesFromCall(results, functionType, callInfo);
-
-    // Our callee could have tail called someone else and changed SP so we need to restore it. Do this after restoring our results so we don't lose them.
+    // Our callee could have tail called someone else and changed SP so we need to restore it. Do this before restoring our results since results are stored at the top of the reserved stack space.
     m_frameSizeLabels.append(m_jit.moveWithPatch(TrustedImmPtr(nullptr), wasmScratchGPR));
     m_jit.subPtr(GPRInfo::callFrameRegister, wasmScratchGPR, MacroAssembler::stackPointerRegister);
+
+    // Push return value(s) onto the expression stack
+    returnValuesFromCall(results, functionType, callInfo);
 
     if (m_info.callCanClobberInstance(functionIndex) || m_info.isImportedFunctionFromFunctionIndexSpace(functionIndex))
         restoreWebAssemblyGlobalStateAfterWasmCall();
@@ -4189,11 +4189,12 @@ void BBQJIT::emitIndirectCall(const char* opcode, const Value& callee, GPRReg ca
 
     // Why can we still call calleeCode after saveValuesAcrossCallAndPassArguments? CalleeCode is a scratch and not any argument GPR.
     m_jit.call(calleeCode, WasmEntryPtrTag);
-    returnValuesFromCall(results, *signature.as<FunctionSignature>(), wasmCalleeInfo);
 
-    // Our callee could have tail called someone else and changed SP so we need to restore it. Do this after restoring our results so we don't lose them.
+    // Our callee could have tail called someone else and changed SP so we need to restore it. Do this before restoring our results since results are stored at the top of the reserved stack space.
     m_frameSizeLabels.append(m_jit.moveWithPatch(TrustedImmPtr(nullptr), wasmScratchGPR));
     m_jit.subPtr(GPRInfo::callFrameRegister, wasmScratchGPR, MacroAssembler::stackPointerRegister);
+
+    returnValuesFromCall(results, *signature.as<FunctionSignature>(), wasmCalleeInfo);
 
     restoreWebAssemblyGlobalStateAfterWasmCall();
 
