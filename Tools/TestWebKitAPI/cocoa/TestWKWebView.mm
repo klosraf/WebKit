@@ -918,6 +918,12 @@ static InputSessionChangeCount nextInputSessionChangeCount()
 #endif
 }
 
+- (void)removeFromTestWindow
+{
+    if (_hostWindow)
+        [self removeFromSuperview];
+}
+
 - (void)clearMessageHandlers:(NSArray *)messageNames
 {
     for (NSString *messageName in messageNames)
