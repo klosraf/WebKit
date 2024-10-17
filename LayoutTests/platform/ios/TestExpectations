@@ -7446,3 +7446,6 @@ imported/w3c/web-platform-tests/css/css-view-transitions/new-content-intrinsic-a
 
 # webkit.org/b/278934 [ macOS iOS wk2 ] imported/w3c/web-platform-tests/content-security-policy/inheritance/history.sub.html is a flaky failure.
 [ Debug ] imported/w3c/web-platform-tests/content-security-policy/inheritance/history.sub.html [ Failure Pass ]
+
+# rdar://137266760 (StabilityTracer: com.apple.WebKit.GPU.Development at com.apple.WebCore:  WebCore::CoreAudioSharedUnit::setupAudioUnit)
+[ Debug ] http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html [ Crash ]

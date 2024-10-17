@@ -2418,3 +2418,6 @@ imported/w3c/web-platform-tests/css/css-writing-modes/text-orientation-upright-s
 [ Sonoma+ ] http/tests/media/video-error-abort.html [ Failure ]
 [ Sonoma+ ] http/tests/media/video-served-as-text.html [ Failure ]
 [ Sonoma+ ] http/tests/media/video-throttled-load-metadata.html [ Failure ]
+
+# rdar://137266760 (StabilityTracer: com.apple.WebKit.GPU.Development at com.apple.WebCore:  WebCore::CoreAudioSharedUnit::setupAudioUnit)
+[ Debug ] http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html [ Crash ]
