@@ -64,6 +64,7 @@
 #include "GridPositionsResolver.h"
 #include "LineClampValue.h"
 #include "LocalFrame.h"
+#include "Quirks.h"
 #include "QuotesData.h"
 #include "RenderStyleInlines.h"
 #include "SVGElementTypeHelpers.h"
@@ -152,6 +153,8 @@ public:
     static ScrollSnapStop convertScrollSnapStop(BuilderState&, const CSSValue&);
     static std::optional<ScrollbarColor> convertScrollbarColor(BuilderState&, const CSSValue&);
     static ScrollbarGutter convertScrollbarGutter(BuilderState&, const CSSValue&);
+    // scrollbar-width converter is only needed for quirking.
+    static ScrollbarWidth convertScrollbarWidth(const BuilderState&, const CSSValue&);
     static GridTrackSize convertGridTrackSize(BuilderState&, const CSSValue&);
     static Vector<GridTrackSize> convertGridTrackSizeList(BuilderState&, const CSSValue&);
     static std::optional<GridTrackList> convertGridTrackList(BuilderState&, const CSSValue&);
@@ -1188,6 +1191,15 @@ inline ScrollbarGutter BuilderConverter::convertScrollbarGutter(BuilderState&, c
     gutter.bothEdges = true;
 
     return gutter;
+}
+
+inline ScrollbarWidth BuilderConverter::convertScrollbarWidth(const BuilderState& builderState, const CSSValue& value)
+{
+    ScrollbarWidth scrollbarWidth = fromCSSValueDeducingType(builderState, value);
+    if (scrollbarWidth == ScrollbarWidth::Thin && builderState.document().quirks().needsScrollbarWidthThinDisabledQuirk())
+        return ScrollbarWidth::Auto;
+
+    return scrollbarWidth;
 }
 
 inline GridLength BuilderConverter::createGridTrackBreadth(BuilderState& builderState, const CSSPrimitiveValue& primitiveValue)

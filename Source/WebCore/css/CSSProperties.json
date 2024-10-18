@@ -9296,6 +9296,7 @@
         },
         "scrollbar-width": {
             "codegen-properties": {
+                "converter": "ScrollbarWidth",
                 "parser-grammar": "auto | thin | none",
                 "settings-flag": "cssScrollbarWidthEnabled"
             },
