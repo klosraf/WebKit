@@ -29,7 +29,6 @@
 
 #include "FrameInfoData.h"
 #include "PDFPluginIdentifier.h"
-#include "PDFScriptEvaluator.h"
 #include "WebMouseEvent.h"
 #include <WebCore/AffineTransform.h>
 #include <WebCore/FindOptions.h>
@@ -88,7 +87,7 @@ using ByteRangeRequestIdentifier = LegacyNullableObjectIdentifier<ByteRangeReque
 
 enum class CheckValidRanges : bool { No, Yes };
 
-class PDFPluginBase : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<PDFPluginBase>, public CanMakeThreadSafeCheckedPtr<PDFPluginBase>, public WebCore::ScrollableArea, public PDFScriptEvaluatorClient, public Identified<PDFPluginIdentifier> {
+class PDFPluginBase : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<PDFPluginBase>, public CanMakeThreadSafeCheckedPtr<PDFPluginBase>, public WebCore::ScrollableArea, public Identified<PDFPluginIdentifier> {
     WTF_MAKE_NONCOPYABLE(PDFPluginBase);
     WTF_MAKE_TZONE_ALLOCATED(PDFPluginBase);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(PDFPluginBase);
@@ -105,10 +104,6 @@ public:
     uint32_t ptrCountWithoutThreadCheck() const final { return CanMakeThreadSafeCheckedPtr::ptrCountWithoutThreadCheck(); }
     void incrementPtrCount() const final { CanMakeThreadSafeCheckedPtr::incrementPtrCount(); }
     void decrementPtrCount() const final { CanMakeThreadSafeCheckedPtr::decrementPtrCount(); }
-
-    using WebKit::PDFScriptEvaluatorClient::weakPtrFactory;
-    using WebKit::PDFScriptEvaluatorClient::WeakValueType;
-    using WebKit::PDFScriptEvaluatorClient::WeakPtrImplType;
 
     void startLoading();
     void destroy();
@@ -317,7 +312,7 @@ protected:
 
     void invalidateRect(const WebCore::IntRect&);
 
-    void print() override;
+    void print();
 
     // ScrollableArea functions.
     WebCore::IntRect scrollCornerRect() const final;
