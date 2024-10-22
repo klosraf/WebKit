@@ -29,6 +29,7 @@
 #if ENABLE(GPU_PROCESS) && ENABLE(ENCRYPTED_MEDIA)
 
 #include "GPUProcess.h"
+#include "Logging.h"
 #include "RemoteCDMConfiguration.h"
 #include "RemoteCDMInstanceProxy.h"
 #include "RemoteCDMInstanceSessionProxy.h"
@@ -95,24 +96,28 @@ void RemoteCDMFactoryProxy::supportsKeySystem(const String& keySystem, Completio
 
 void RemoteCDMFactoryProxy::didReceiveCDMMessage(IPC::Connection& connection, IPC::Decoder& decoder)
 {
+    MESSAGE_CHECK_BASE(LegacyNullableObjectIdentifier<RemoteCDMIdentifierType>::isValidIdentifier(decoder.destinationID()), connection);
     if (auto* proxy = m_proxies.get(LegacyNullableObjectIdentifier<RemoteCDMIdentifierType>(decoder.destinationID())))
         proxy->didReceiveMessage(connection, decoder);
 }
 
 void RemoteCDMFactoryProxy::didReceiveCDMInstanceMessage(IPC::Connection& connection, IPC::Decoder& decoder)
 {
+    MESSAGE_CHECK_BASE(LegacyNullableObjectIdentifier<RemoteCDMInstanceIdentifierType>::isValidIdentifier(decoder.destinationID()), connection);
     if (auto* instance = m_instances.get(LegacyNullableObjectIdentifier<RemoteCDMInstanceIdentifierType>(decoder.destinationID())))
         instance->didReceiveMessage(connection, decoder);
 }
 
 void RemoteCDMFactoryProxy::didReceiveCDMInstanceSessionMessage(IPC::Connection& connection, IPC::Decoder& decoder)
 {
+    MESSAGE_CHECK_BASE(LegacyNullableObjectIdentifier<RemoteCDMInstanceSessionIdentifierType>::isValidIdentifier(decoder.destinationID()), connection);
     if (auto* session = m_sessions.get(LegacyNullableObjectIdentifier<RemoteCDMInstanceSessionIdentifierType>(decoder.destinationID())))
         session->didReceiveMessage(connection, decoder);
 }
 
 bool RemoteCDMFactoryProxy::didReceiveSyncCDMMessage(IPC::Connection& connection, IPC::Decoder& decoder, UniqueRef<IPC::Encoder>& encoder)
 {
+    MESSAGE_CHECK_WITH_RETURN_VALUE_BASE(LegacyNullableObjectIdentifier<RemoteCDMIdentifierType>::isValidIdentifier(decoder.destinationID()), connection, false);
     if (auto* proxy = m_proxies.get(LegacyNullableObjectIdentifier<RemoteCDMIdentifierType>(decoder.destinationID())))
         return proxy->didReceiveSyncMessage(connection, decoder, encoder);
     return false;
@@ -120,6 +125,7 @@ bool RemoteCDMFactoryProxy::didReceiveSyncCDMMessage(IPC::Connection& connection
 
 bool RemoteCDMFactoryProxy::didReceiveSyncCDMInstanceMessage(IPC::Connection& connection, IPC::Decoder& decoder, UniqueRef<IPC::Encoder>& encoder)
 {
+    MESSAGE_CHECK_WITH_RETURN_VALUE_BASE(LegacyNullableObjectIdentifier<RemoteCDMInstanceIdentifierType>::isValidIdentifier(decoder.destinationID()), connection, false);
     if (auto* instance = m_instances.get(LegacyNullableObjectIdentifier<RemoteCDMInstanceIdentifierType>(decoder.destinationID())))
         return instance->didReceiveSyncMessage(connection, decoder, encoder);
     return false;
@@ -127,6 +133,7 @@ bool RemoteCDMFactoryProxy::didReceiveSyncCDMInstanceMessage(IPC::Connection& co
 
 bool RemoteCDMFactoryProxy::didReceiveSyncCDMInstanceSessionMessage(IPC::Connection& connection, IPC::Decoder& decoder, UniqueRef<IPC::Encoder>& encoder)
 {
+    MESSAGE_CHECK_WITH_RETURN_VALUE_BASE(LegacyNullableObjectIdentifier<RemoteCDMInstanceSessionIdentifierType>::isValidIdentifier(decoder.destinationID()), connection, false);
     if (auto* session = m_sessions.get(LegacyNullableObjectIdentifier<RemoteCDMInstanceSessionIdentifierType>(decoder.destinationID())))
         return session->didReceiveSyncMessage(connection, decoder, encoder);
     return false;
