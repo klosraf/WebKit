@@ -1213,12 +1213,12 @@ void WebPageProxy::didBeginWritingToolsSession(const WebCore::WritingTools::Sess
 
 void WebPageProxy::proofreadingSessionDidReceiveSuggestions(const WebCore::WritingTools::Session& session, const Vector<WebCore::WritingTools::TextSuggestion>& suggestions, const WebCore::WritingTools::Context& context, bool finished, CompletionHandler<void()>&& completionHandler)
 {
-    legacyMainFrameProcess()->sendWithAsyncReply(Messages::WebPage::ProofreadingSessionDidReceiveSuggestions(session, suggestions, context, finished), WTFMove(completionHandler), webPageIDInMainFrameProcess());
+    protectedLegacyMainFrameProcess()->sendWithAsyncReply(Messages::WebPage::ProofreadingSessionDidReceiveSuggestions(session, suggestions, context, finished), WTFMove(completionHandler), webPageIDInMainFrameProcess());
 }
 
 void WebPageProxy::proofreadingSessionDidCompletePartialReplacement(const WebCore::WritingTools::Session& session, const Vector<WebCore::WritingTools::TextSuggestion>& suggestions, const WebCore::WritingTools::Context& context, bool finished, CompletionHandler<void()>&& completionHandler)
 {
-    legacyMainFrameProcess()->sendWithAsyncReply(Messages::WebPage::ProofreadingSessionDidCompletePartialReplacement(session, suggestions, context, finished), WTFMove(completionHandler), webPageIDInMainFrameProcess());
+    protectedLegacyMainFrameProcess()->sendWithAsyncReply(Messages::WebPage::ProofreadingSessionDidCompletePartialReplacement(session, suggestions, context, finished), WTFMove(completionHandler), webPageIDInMainFrameProcess());
 }
 
 void WebPageProxy::proofreadingSessionDidUpdateStateForSuggestion(const WebCore::WritingTools::Session& session, WebCore::WritingTools::TextSuggestion::State state, const WebCore::WritingTools::TextSuggestion& suggestion, const WebCore::WritingTools::Context& context)
