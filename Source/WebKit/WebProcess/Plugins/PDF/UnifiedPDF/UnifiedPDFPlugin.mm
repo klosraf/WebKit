@@ -767,11 +767,11 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
             context.clip(pageBoundsInPaintingCoordinates);
 
             ASSERT(layer);
-            bool paintedPageContent = asyncRenderer->paintTilesForPage(layer, context, documentScale, clipRect, pageBoundsInPaintingCoordinates, pageInfo.pageIndex);
-            LOG_WITH_STREAM(PDFAsyncRendering, stream << "UnifiedPDFPlugin::paintPDFContent - painting tiles for page " << pageInfo.pageIndex << " dest rect " << pageBoundsInPaintingCoordinates << " clip " << clipRect << " - painted cached tile " << paintedPageContent);
 
-            if (!paintedPageContent && showDebugIndicators)
+            if (showDebugIndicators)
                 context.fillRect(pageBoundsInPaintingCoordinates, Color::yellow.colorWithAlphaByte(128));
+
+            asyncRenderer->paintTilesForPage(layer, context, documentScale, clipRect, pageInfo.rectInPageLayoutCoordinates, pageBoundsInPaintingCoordinates, pageInfo.pageIndex);
         }
 
         bool currentPageHasAnnotation = pageWithAnnotation && *pageWithAnnotation == pageInfo.pageIndex;
@@ -2798,7 +2798,8 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForSelection(PDFSelection *selecti
             continue;
 
         // FIXME: <https://webkit.org/b/276981> This needs per-row adjustment via the presentation controller.
-        pageCoverage.append({ *pageIndex, FloatRect { [selection boundsForPage:page] } });
+        auto selectionBounds = FloatRect { [selection boundsForPage:page] };
+        pageCoverage.append(PerPageInfo { *pageIndex, selectionBounds, selectionBounds });
         if (firstPageOnly == FirstPageOnly::Yes)
             break;
     }
@@ -3058,8 +3059,8 @@ void UnifiedPDFPlugin::collectFindMatchRects(const String& target, WebCore::Find
             if (!pageIndex)
                 continue;
 
-            auto perPageInfo = PerPageInfo { *pageIndex, [selection boundsForPage:page] };
-            m_findMatchRects.append(WTFMove(perPageInfo));
+            auto selectionBounds = FloatRect { [selection boundsForPage:page] };
+            m_findMatchRects.append(PerPageInfo { *pageIndex, selectionBounds, selectionBounds });
         }
     }
 
