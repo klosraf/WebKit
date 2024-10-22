@@ -64,7 +64,6 @@
 #endif
 
 #if PLATFORM(COCOA)
-#include <WebCore/ScreenProperties.h>
 #include <dispatch/dispatch.h>
 #include <wtf/MachSendRight.h>
 
@@ -109,6 +108,7 @@ struct MessagePortIdentifier;
 struct MessageWithMessagePorts;
 struct MockMediaDevice;
 struct PrewarmInformation;
+struct ScreenProperties;
 struct ServiceWorkerContextData;
 }
 
@@ -231,8 +231,8 @@ public:
     std::optional<WebCore::UserGestureTokenIdentifier> userGestureTokenIdentifier(std::optional<WebCore::PageIdentifier>, RefPtr<WebCore::UserGestureToken>);
     void userGestureTokenDestroyed(WebCore::PageIdentifier, WebCore::UserGestureToken&);
     
-    const TextCheckerState& textCheckerState() const { return m_textCheckerState; }
-    void setTextCheckerState(const TextCheckerState&);
+    OptionSet<TextCheckerState> textCheckerState() const { return m_textCheckerState; }
+    void setTextCheckerState(OptionSet<TextCheckerState>);
 
     EventDispatcher& eventDispatcher() { return m_eventDispatcher; }
 
@@ -693,7 +693,7 @@ private:
     using WebProcessSupplementMap = HashMap<ASCIILiteral, std::unique_ptr<WebProcessSupplement>>;
     WebProcessSupplementMap m_supplements;
 
-    TextCheckerState m_textCheckerState;
+    OptionSet<TextCheckerState> m_textCheckerState;
 
     String m_uiProcessBundleIdentifier;
     RefPtr<NetworkProcessConnection> m_networkProcessConnection;
