@@ -61,7 +61,7 @@ class NetworkSession;
 class PendingDownload : public NetworkLoadClient, public IPC::MessageSender, public CanMakeWeakPtr<PendingDownload> {
     WTF_MAKE_TZONE_ALLOCATED(PendingDownload);
 public:
-    PendingDownload(IPC::Connection*, NetworkLoadParameters&&, DownloadID, NetworkSession&, const String& suggestedName, WebCore::FromDownloadAttribute);
+    PendingDownload(IPC::Connection*, NetworkLoadParameters&&, DownloadID, NetworkSession&, const String& suggestedName, WebCore::FromDownloadAttribute, std::optional<WebCore::ProcessIdentifier>);
     PendingDownload(IPC::Connection*, std::unique_ptr<NetworkLoad>&&, ResponseCompletionHandler&&, DownloadID, const WebCore::ResourceRequest&, const WebCore::ResourceResponse&);
     virtual ~PendingDownload();
 
@@ -77,7 +77,6 @@ public:
 #endif
 
 private:    
-
     // NetworkLoadClient.
     void didSendData(uint64_t bytesSent, uint64_t totalBytesToBeSent) override { }
     bool isSynchronous() const override { return false; }
@@ -99,8 +98,7 @@ private:
     bool m_isAllowedToAskUserForCredentials;
     bool m_isDownloadCancelled = false;
     WebCore::FromDownloadAttribute m_fromDownloadAttribute;
-    bool m_isFullWebBrowser = true;
-
+    std::optional<WebCore::ProcessIdentifier> m_webProcessID;
 
 #if PLATFORM(COCOA)
     URL m_progressURL;
