@@ -46,14 +46,29 @@ RemoteXRSubImage::RemoteXRSubImage(WebCore::WebGPU::XRSubImage& xrSubImage, WebG
     , m_identifier(identifier)
     , m_gpu(gpu)
 {
-    m_streamConnection->startReceivingMessages(*this, Messages::RemoteXRSubImage::messageReceiverName(), m_identifier.toUInt64());
+    protectedStreamConnection()->startReceivingMessages(*this, Messages::RemoteXRSubImage::messageReceiverName(), m_identifier.toUInt64());
 }
 
 RemoteXRSubImage::~RemoteXRSubImage() = default;
 
+Ref<IPC::StreamServerConnection> RemoteXRSubImage::protectedStreamConnection()
+{
+    return m_streamConnection;
+}
+
+Ref<WebCore::WebGPU::XRSubImage> RemoteXRSubImage::protectedBacking()
+{
+    return m_backing;
+}
+
+Ref<RemoteGPU> RemoteXRSubImage::protectedGPU() const
+{
+    return m_gpu.get();
+}
+
 RefPtr<IPC::Connection> RemoteXRSubImage::connection() const
 {
-    RefPtr connection = m_gpu->gpuConnectionToWebProcess();
+    RefPtr connection = protectedGPU()->gpuConnectionToWebProcess();
     if (!connection)
         return nullptr;
     return &connection->connection();
@@ -61,12 +76,12 @@ RefPtr<IPC::Connection> RemoteXRSubImage::connection() const
 
 void RemoteXRSubImage::destruct()
 {
-    m_objectHeap->removeObject(m_identifier);
+    Ref { m_objectHeap.get() }->removeObject(m_identifier);
 }
 
 void RemoteXRSubImage::stopListeningForIPC()
 {
-    m_streamConnection->stopReceivingMessages(Messages::RemoteXRSubImage::messageReceiverName(), m_identifier.toUInt64());
+    protectedStreamConnection()->stopReceivingMessages(Messages::RemoteXRSubImage::messageReceiverName(), m_identifier.toUInt64());
 }
 
 } // namespace WebKit

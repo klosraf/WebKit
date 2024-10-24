@@ -7,10 +7,6 @@ GPUProcess/ShapeDetection/RemoteFaceDetector.cpp
 GPUProcess/graphics/RemoteDisplayListRecorder.h
 GPUProcess/graphics/RemoteGraphicsContextGLFunctionsGenerated.h
 GPUProcess/graphics/ScopedWebGLRenderingResourcesRequest.cpp
-GPUProcess/graphics/WebGPU/RemoteBuffer.cpp
-GPUProcess/graphics/WebGPU/RemoteRenderBundle.cpp
-GPUProcess/graphics/WebGPU/RemoteTexture.cpp
-GPUProcess/graphics/WebGPU/RemoteXRBinding.cpp
 GPUProcess/media/RemoteAudioSourceProviderProxy.cpp
 GPUProcess/media/RemoteAudioTrackProxy.h
 GPUProcess/media/RemoteMediaPlayerManagerProxy.cpp
