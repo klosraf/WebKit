@@ -3649,6 +3649,25 @@ Vector<WebCore::FloatRect> UnifiedPDFPlugin::annotationRectsForTesting() const
     return annotationRects;
 }
 
+
+void UnifiedPDFPlugin::setTextAnnotationValueForTesting(unsigned pageIndex, unsigned annotationIndex, const String& value)
+{
+    if (pageIndex >= m_documentLayout.pageCount())
+        return;
+
+    RetainPtr page = m_documentLayout.pageAtIndex(pageIndex);
+    RetainPtr annotationsOnPage = [page annotations];
+    if (annotationIndex >= [annotationsOnPage count])
+        return;
+
+    RetainPtr annotation = [annotationsOnPage objectAtIndex:annotationIndex];
+    if (![annotation isKindOfClass:getPDFAnnotationTextWidgetClass()])
+        return;
+
+    [annotation setWidgetStringValue:value];
+    setNeedsRepaintForAnnotation(annotation.get(), repaintRequirementsForAnnotation(annotation.get(), IsAnnotationCommit::Yes));
+}
+
 void UnifiedPDFPlugin::setPDFDisplayModeForTesting(const String& mode)
 {
     setDisplayModeAndUpdateLayout([mode] {
