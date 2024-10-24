@@ -4650,8 +4650,9 @@ void WebViewImpl::showWritingTools()
     auto& editorState = m_page->editorState();
     if (editorState.selectionIsRange && editorState.hasPostLayoutData())
         selectionRect = editorState.postLayoutData->selectionBoundingRect;
-
+ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     [[PAL::getWTWritingToolsClass() sharedInstance] showPanelForSelectionRect:selectionRect ofView:m_view.getAutoreleased() forDelegate:(NSObject<WTWritingToolsDelegate> *)m_view.getAutoreleased()];
+ALLOW_DEPRECATED_DECLARATIONS_END
 }
 
 void WebViewImpl::addTextAnimationForAnimationID(WTF::UUID uuid, const WebCore::TextAnimationData& data)
