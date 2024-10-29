@@ -4036,6 +4036,12 @@ void Document::setTimerThrottlingEnabled(bool shouldThrottle)
     didChangeTimerAlignmentInterval();
 }
 
+// https://html.spec.whatwg.org/#updating-the-document:fire-a-page-transition-event
+void Document::clearRevealForReactivation()
+{
+    m_hasBeenRevealed = false;
+}
+
 void Document::setVisibilityHiddenDueToDismissal(bool hiddenDueToDismissal)
 {
     if (m_visibilityHiddenDueToDismissal == hiddenDueToDismissal)
@@ -6897,6 +6903,9 @@ void Document::suspend(ReasonForSuspension reason)
     // is dispatched, after the document is restored from the back/forward cache.
     m_didDispatchViewportPropertiesChanged = false;
 #endif
+
+    if (auto viewTransition = m_activeViewTransition)
+        viewTransition->skipTransition();
 
     if (RefPtr page = this->page())
         page->lockAllOverlayScrollbarsToHidden(true);
@@ -10860,6 +10869,14 @@ void Document::setRenderingIsSuppressedForViewTransitionAfterUpdateRendering()
     m_enableRenderingIsSuppressedForViewTransitionAfterUpdateRendering = true;
 }
 
+// FIXME: Remove this once cross-document view transitions capture old state on the subsequent rendering update instead of immediately.
+void Document::setRenderingIsSuppressedForViewTransitionImmediately()
+{
+    m_renderingIsSuppressedForViewTransition = true;
+    if (CheckedPtr view = renderView())
+        view->compositor().setRenderingIsSuppressed(true);
+}
+
 void Document::clearRenderingIsSuppressedForViewTransition()
 {
     m_enableRenderingIsSuppressedForViewTransitionAfterUpdateRendering = false;
@@ -10871,11 +10888,8 @@ void Document::clearRenderingIsSuppressedForViewTransition()
 
 void Document::flushDeferredRenderingIsSuppressedForViewTransitionChanges()
 {
-    if (std::exchange(m_enableRenderingIsSuppressedForViewTransitionAfterUpdateRendering, false)) {
-        m_renderingIsSuppressedForViewTransition = true;
-        if (CheckedPtr view = renderView())
-            view->compositor().setRenderingIsSuppressed(true);
-    }
+    if (std::exchange(m_enableRenderingIsSuppressedForViewTransitionAfterUpdateRendering, false))
+        setRenderingIsSuppressedForViewTransitionImmediately();
 }
 
 // https://drafts.csswg.org/css-view-transitions/#ViewTransition-prepare
