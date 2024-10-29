@@ -937,7 +937,8 @@ public:
     static const TypeDefinition& get(TypeIndex);
     static TypeIndex get(const TypeDefinition&);
 
-    static const FunctionSignature& getFunctionSignature(TypeIndex);
+    inline static const FunctionSignature& getFunctionSignature(TypeIndex);
+    inline static std::optional<const FunctionSignature*> tryGetFunctionSignature(TypeIndex);
 
     static void tryCleanup();
 private:
