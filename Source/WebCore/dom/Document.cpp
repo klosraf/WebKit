@@ -1017,7 +1017,7 @@ DocumentFontLoader& Document::ensureFontLoader()
 {
     ASSERT(m_constructionDidFinish);
     ASSERT(!m_fontLoader);
-    m_fontLoader = makeUnique<DocumentFontLoader>(*this);
+    m_fontLoader = makeUniqueWithoutRefCountedCheck<DocumentFontLoader>(*this);
     return *m_fontLoader;
 }
 
