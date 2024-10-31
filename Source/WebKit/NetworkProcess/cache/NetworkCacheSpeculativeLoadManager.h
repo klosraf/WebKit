@@ -93,7 +93,7 @@ private:
     Ref<Storage> protectedStorage() const;
 
     WeakRef<Cache> m_cache;
-    CheckedRef<Storage> m_storage;
+    ThreadSafeWeakPtr<Storage> m_storage; // Not expected to be null.
 
     class PendingFrameLoad;
     HashMap<GlobalFrameID, RefPtr<PendingFrameLoad>> m_pendingFrameLoads;
