@@ -1945,4 +1945,19 @@ bool Quirks::shouldHideCoarsePointerCharacteristics() const
     return false;
 }
 
+bool Quirks::needsZeroMaxTouchPointsQuirk() const
+{
+#if ENABLE(DESKTOP_CONTENT_MODE_QUIRKS)
+    if (!needsQuirks())
+        return false;
+
+    if (!m_needsZeroMaxTouchPointsQuirk)
+        m_needsZeroMaxTouchPointsQuirk = isDomain("max.com"_s);
+
+    return *m_needsZeroMaxTouchPointsQuirk;
+#endif
+
+    return false;
+}
+
 }

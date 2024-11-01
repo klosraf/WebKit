@@ -67,14 +67,11 @@ public:
     bool standalone() const;
 #endif
 
-#if ENABLE(IOS_TOUCH_EVENTS) && !PLATFORM(MACCATALYST)
-    int maxTouchPoints() const { return 5; }
-#else
-    int maxTouchPoints() const { return 0; }
-#endif
+    int maxTouchPoints() const;
 
     GPU* gpu();
 
+    const Document* document() const;
     Document* document();
 
     void setAppBadge(std::optional<unsigned long long>, Ref<DeferredPromise>&&);

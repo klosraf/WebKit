@@ -210,6 +210,8 @@ public:
 
     bool shouldHideCoarsePointerCharacteristics() const;
 
+    bool needsZeroMaxTouchPointsQuirk() const;
+
 private:
     bool needsQuirks() const;
     bool isDomain(const String&) const;
@@ -284,7 +286,9 @@ private:
     mutable std::optional<bool> m_shouldIgnorePlaysInlineRequirementQuirk;
     mutable std::optional<bool> m_needsRelaxedCorsMixedContentCheckQuirk;
     mutable std::optional<bool> m_needsScrollbarWidthThinDisabledQuirk;
-
+#if ENABLE(DESKTOP_CONTENT_MODE_QUIRKS)
+    mutable std::optional<bool> m_needsZeroMaxTouchPointsQuirk;
+#endif
     Vector<RegistrableDomain> m_subFrameDomainsForStorageAccessQuirk;
 };
 
