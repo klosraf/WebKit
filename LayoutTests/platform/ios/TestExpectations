@@ -7449,3 +7449,6 @@ imported/w3c/web-platform-tests/css/css-view-transitions/new-content-intrinsic-a
 
 # rdar://137266760 (StabilityTracer: com.apple.WebKit.GPU.Development at com.apple.WebCore:  WebCore::CoreAudioSharedUnit::setupAudioUnit)
 [ Debug ] http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html [ Crash ]
+
+# off by 1 pixel (rounding)
+imported/w3c/web-platform-tests/css/css-inline/text-box-trim/text-box-on-non-root-inline-box.html [ Failure ]
