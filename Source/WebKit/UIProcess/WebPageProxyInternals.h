@@ -445,7 +445,7 @@ public:
     void externalOutputDeviceAvailableDidChange(WebCore::PlaybackTargetClientContextIdentifier, bool) final;
     void setShouldPlayToPlaybackTarget(WebCore::PlaybackTargetClientContextIdentifier, bool) final;
     void playbackTargetPickerWasDismissed(WebCore::PlaybackTargetClientContextIdentifier) final;
-    bool alwaysOnLoggingAllowed() const final { return page.isAlwaysOnLoggingAllowed(); }
+    bool alwaysOnLoggingAllowed() const final { return page.sessionID().isAlwaysOnLoggingAllowed(); }
     RetainPtr<PlatformView> platformView() const final;
 #endif
 };

@@ -9528,7 +9528,7 @@ const Logger& WebPage::logger() const
 {
     if (!m_logger) {
         m_logger = Logger::create(this);
-        m_logger->setEnabled(this, isAlwaysOnLoggingAllowed());
+        m_logger->setEnabled(this, !sessionID().isEphemeral());
     }
 
     return *m_logger;
@@ -10020,13 +10020,6 @@ void WebPage::updateCaptureState(const WebCore::Document& document, bool isActiv
     });
 }
 #endif
-
-
-bool WebPage::isAlwaysOnLoggingAllowed() const
-{
-    RefPtr page { corePage() };
-    return page && page->isAlwaysOnLoggingAllowed();
-}
 
 } // namespace WebKit
 

@@ -4333,7 +4333,7 @@ void Page::configureLoggingChannel(const String& channelName, WTFLogChannelState
 
 #if USE(LIBWEBRTC)
         RefPtr localMainFrame = dynamicDowncast<LocalFrame>(m_mainFrame.get());
-        if (channel == &LogWebRTC && localMainFrame && localMainFrame->document() && isAlwaysOnLoggingAllowed())
+        if (channel == &LogWebRTC && localMainFrame && localMainFrame->document() && !sessionID().isEphemeral())
             webRTCProvider().setLoggingLevel(LogWebRTC.level);
 #endif
     }
@@ -5115,10 +5115,5 @@ bool Page::isFullscreenManagerEnabled() const
     return settings->fullScreenEnabled() || settings->videoFullscreenRequiresElementFullscreen();
 }
 #endif
-
-bool Page::isAlwaysOnLoggingAllowed() const
-{
-    return m_sessionID.isAlwaysOnLoggingAllowed() || protectedSettings()->allowPrivacySensitiveOperationsInNonPersistentDataStores();
-}
 
 } // namespace WebCore

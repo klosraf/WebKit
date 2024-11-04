@@ -515,8 +515,6 @@ public:
     const WebCore::ProcessIdentity& processIdentity();
 #endif
 
-    bool isAlwaysOnLoggingAllowed() const;
-
 private:
     Type type() const final { return Type::WebContent; }
 

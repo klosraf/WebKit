@@ -1821,8 +1821,6 @@ public:
 
     void setTopContentInset(float);
 
-    bool isAlwaysOnLoggingAllowed() const;
-
 private:
     WebPage(WebCore::PageIdentifier, WebPageCreationParameters&&);
 

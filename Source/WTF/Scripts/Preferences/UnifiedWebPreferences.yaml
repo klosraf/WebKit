@@ -293,7 +293,6 @@ AllowPrivacySensitiveOperationsInNonPersistentDataStores:
       default: false
     WebCore:
       default: false
-  sharedPreferenceForWebProcess: true
 
 AllowRunningOfInsecureContent:
   type: bool

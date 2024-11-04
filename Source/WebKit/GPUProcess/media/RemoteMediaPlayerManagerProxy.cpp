@@ -177,8 +177,8 @@ Logger& RemoteMediaPlayerManagerProxy::logger()
 {
     if (!m_logger) {
         m_logger = Logger::create(this);
-        RefPtr connection { m_gpuConnectionToWebProcess.get() };
-        m_logger->setEnabled(this, connection && connection->isAlwaysOnLoggingAllowed());
+        auto connection = m_gpuConnectionToWebProcess.get();
+        m_logger->setEnabled(this, connection ? connection->sessionID().isAlwaysOnLoggingAllowed() : false);
     }
 
     return *m_logger;

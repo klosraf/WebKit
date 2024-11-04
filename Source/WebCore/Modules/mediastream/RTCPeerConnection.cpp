@@ -98,10 +98,10 @@ ExceptionOr<Ref<RTCPeerConnection>> RTCPeerConnection::create(Document& document
         return exception.releaseException();
 
     if (!peerConnection->isClosed()) {
-        if (RefPtr page = document.protectedPage()) {
+        if (auto* page = document.page()) {
             peerConnection->registerToController(page->rtcController());
 #if USE(LIBWEBRTC) && (!LOG_DISABLED || !RELEASE_LOG_DISABLED)
-            if (page->isAlwaysOnLoggingAllowed()) {
+            if (!page->sessionID().isEphemeral()) {
                 WTFLogLevel level = LogWebRTC.level;
                 if (level != WTFLogLevel::Debug && document.settings().webRTCMediaPipelineAdditionalLoggingEnabled())
                     level = WTFLogLevel::Info;

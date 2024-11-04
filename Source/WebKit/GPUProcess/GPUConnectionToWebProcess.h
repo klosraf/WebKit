@@ -263,8 +263,6 @@ public:
     void setMediaEnvironment(WebCore::PageIdentifier, const String&);
 #endif
 
-    bool isAlwaysOnLoggingAllowed() const;
-
 private:
     GPUConnectionToWebProcess(GPUProcess&, WebCore::ProcessIdentifier, PAL::SessionID, IPC::Connection::Handle&&, GPUProcessConnectionParameters&&);
 

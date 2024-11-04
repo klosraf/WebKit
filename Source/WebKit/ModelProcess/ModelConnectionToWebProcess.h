@@ -97,8 +97,6 @@ public:
 
     static uint64_t objectCountForTesting() { return gObjectCountForTesting; }
 
-    bool isAlwaysOnLoggingAllowed() const;
-
 private:
     ModelConnectionToWebProcess(ModelProcess&, WebCore::ProcessIdentifier, PAL::SessionID, IPC::Connection::Handle&&, ModelProcessConnectionParameters&&);
 
