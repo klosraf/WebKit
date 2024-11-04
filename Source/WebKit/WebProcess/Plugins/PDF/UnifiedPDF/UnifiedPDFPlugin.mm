@@ -215,6 +215,7 @@ void UnifiedPDFPlugin::teardown()
 #endif
 
     setActiveAnnotation({ nullptr, IsInPluginCleanup::Yes });
+    m_annotationContainer = nullptr;
 }
 
 GraphicsLayer* UnifiedPDFPlugin::graphicsLayer() const
@@ -360,6 +361,14 @@ void UnifiedPDFPlugin::createPasswordEntryForm()
 }
 
 #endif
+
+void UnifiedPDFPlugin::teardownPasswordEntryForm()
+{
+#if PLATFORM(MAC)
+    m_passwordForm = nullptr;
+    m_passwordField = nullptr;
+#endif
+}
 
 void UnifiedPDFPlugin::attemptToUnlockPDF(const String& password)
 {

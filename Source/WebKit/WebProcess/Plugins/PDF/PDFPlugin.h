@@ -188,6 +188,7 @@ private:
     void updatePageAndDeviceScaleFactors();
 
     void createPasswordEntryForm();
+    void teardownPasswordEntryForm() override;
 
     NSData *liveData() const override;
 

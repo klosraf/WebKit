@@ -672,6 +672,11 @@ void PDFPlugin::createPasswordEntryForm()
     passwordField->attach(m_annotationContainer.get());
 }
 
+void PDFPlugin::teardownPasswordEntryForm()
+{
+    m_passwordField = nullptr;
+}
+
 void PDFPlugin::attemptToUnlockPDF(const String& password)
 {
     [m_pdfLayerController attemptToUnlockWithPassword:password];

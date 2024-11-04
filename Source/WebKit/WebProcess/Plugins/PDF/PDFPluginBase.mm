@@ -156,6 +156,9 @@ void PDFPluginBase::teardown()
         existingCompletionHandler({ }, WTFMove(frameInfo), { }, { });
     }
 #endif // ENABLE(PDF_HUD)
+
+    if (isLocked())
+        teardownPasswordEntryForm();
 }
 
 Page* PDFPluginBase::page() const

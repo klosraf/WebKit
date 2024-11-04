@@ -552,6 +552,7 @@ private:
 #if PLATFORM(MAC)
     void createPasswordEntryForm();
 #endif
+    void teardownPasswordEntryForm() override;
 
     bool isInDiscreteDisplayMode() const;
     bool isShowingTwoPages() const;
