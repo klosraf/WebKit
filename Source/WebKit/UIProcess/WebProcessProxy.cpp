@@ -1179,6 +1179,8 @@ void WebProcessProxy::createModelProcessConnection(IPC::Connection::Handle&& con
         anyPageHasModelProcessEnabled |= page->preferences().modelProcessEnabled();
     MESSAGE_CHECK(anyPageHasModelProcessEnabled);
 
+    parameters.sharedPreferencesForWebProcess = sharedPreferencesForWebProcess();
+
 #if ENABLE(IPC_TESTING_API)
     parameters.ignoreInvalidMessageForTesting = ignoreInvalidMessageForTesting();
 #endif
@@ -2268,6 +2270,9 @@ void WebProcessProxy::didSyncSharedPreferencesForWebProcessWithNetworkProcess(ui
 #if ENABLE(GPU_PROCESS)
         || m_sharedPreferencesVersionInGPUProcess < m_awaitedSharedPreferencesVersion
 #endif
+#if ENABLE(MODEL_PROCESS)
+        || m_sharedPreferencesVersionInModelProcess < m_awaitedSharedPreferencesVersion
+#endif
         )
         return;
     auto completionHandler = std::exchange(m_sharedPreferencesForWebProcessCompletionHandler, { });
@@ -2282,7 +2287,29 @@ void WebProcessProxy::didSyncSharedPreferencesForWebProcessWithGPUProcess(uint64
 {
     m_sharedPreferencesVersionInGPUProcess = syncedSharedPreferencesVersion;
     if (m_sharedPreferencesVersionInNetworkProcess < m_awaitedSharedPreferencesVersion
-        || m_sharedPreferencesVersionInGPUProcess < m_awaitedSharedPreferencesVersion)
+        || m_sharedPreferencesVersionInGPUProcess < m_awaitedSharedPreferencesVersion
+#if ENABLE(MODEL_PROCESS)
+        || m_sharedPreferencesVersionInModelProcess < m_awaitedSharedPreferencesVersion
+#endif
+        )
+        return;
+    auto completionHandler = std::exchange(m_sharedPreferencesForWebProcessCompletionHandler, { });
+    if (!completionHandler)
+        return;
+    completionHandler(true);
+    m_awaitedSharedPreferencesVersion = 0;
+}
+#endif
+
+#if ENABLE(MODEL_PROCESS)
+void WebProcessProxy::didSyncSharedPreferencesForWebProcessWithModelProcess(uint64_t syncedSharedPreferencesVersion)
+{
+    m_sharedPreferencesVersionInModelProcess = syncedSharedPreferencesVersion;
+    if (m_sharedPreferencesVersionInNetworkProcess < m_awaitedSharedPreferencesVersion
+#if ENABLE(GPU_PROCESS)
+        || m_sharedPreferencesVersionInGPUProcess < m_awaitedSharedPreferencesVersion
+#endif
+        || m_sharedPreferencesVersionInModelProcess < m_awaitedSharedPreferencesVersion)
         return;
     auto completionHandler = std::exchange(m_sharedPreferencesForWebProcessCompletionHandler, { });
     if (!completionHandler)
