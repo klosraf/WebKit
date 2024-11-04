@@ -30,7 +30,6 @@
 #include "Connection.h"
 #include "LayerHostingContext.h"
 #include "MessageReceiver.h"
-#include "SharedPreferencesForWebProcess.h"
 #include <CoreRE/CoreRE.h>
 #include <WebCore/Color.h>
 #include <WebCore/LayerHostingContextIdentifier.h>
@@ -66,8 +65,6 @@ class ModelProcessModelPlayerProxy final
 public:
     static Ref<ModelProcessModelPlayerProxy> create(ModelProcessModelPlayerManagerProxy&, WebCore::ModelPlayerIdentifier, Ref<IPC::Connection>&&);
     ~ModelProcessModelPlayerProxy();
-
-    const SharedPreferencesForWebProcess& sharedPreferencesForWebProcess() const;
 
     static bool transformSupported(const simd_float4x4& transform);
 
