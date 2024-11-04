@@ -463,6 +463,9 @@ private:
 
     void absoluteQuadsIgnoringContinuation(const FloatRect&, Vector<FloatQuad>&, bool* wasFixed) const override;
 
+    bool contentBoxLogicalWidthChanged(const RenderStyle&, const RenderStyle&);
+    bool scrollbarWidthDidChange(const RenderStyle&, const RenderStyle&, ScrollbarOrientation);
+
 protected:
     void dirtyForLayoutFromPercentageHeightDescendants();
 
