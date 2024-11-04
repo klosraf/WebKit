@@ -32,6 +32,7 @@
 #include "APIUserScript.h"
 #include "APIUserStyleSheet.h"
 #include "MessageReceiver.h"
+#include "ProcessThrottler.h"
 #include "WebExtension.h"
 #include "WebExtensionAction.h"
 #include "WebExtensionAlarm.h"
@@ -219,7 +220,6 @@ public:
 
 #if ENABLE(INSPECTOR_EXTENSIONS)
     using InspectorTabVector = Vector<std::pair<Ref<WebInspectorUIProxy>, RefPtr<WebExtensionTab>>>;
-    using TabIdentifierWebViewPair = std::pair<WebExtensionTabIdentifier, RetainPtr<WKWebView>>;
 #endif
 
     using ReloadFromOrigin = WebExtensionTab::ReloadFromOrigin;
@@ -268,6 +268,14 @@ public:
         Sidebar,
         Tab,
     };
+
+#if ENABLE(INSPECTOR_EXTENSIONS)
+    struct InspectorContext {
+        std::optional<WebExtensionTabIdentifier> tabIdentifier;
+        RefPtr<API::InspectorExtension> extension;
+        RetainPtr<WKWebView> backgroundWebView;
+    };
+#endif
 
     WebExtensionContextParameters parameters() const;
 
@@ -957,6 +965,7 @@ private:
     String m_previousVersion;
 
     RetainPtr<WKWebView> m_backgroundWebView;
+    std::unique_ptr<ProcessThrottlerActivity> m_backgroundWebViewActivity;
     RetainPtr<NSError> m_backgroundContentLoadError;
     RetainPtr<_WKWebExtensionContextDelegate> m_delegate;
 
@@ -968,8 +977,7 @@ private:
     bool m_safeToLoadBackgroundContent { false };
 
 #if ENABLE(INSPECTOR_EXTENSIONS)
-    WeakHashMap<WebInspectorUIProxy, TabIdentifierWebViewPair> m_inspectorBackgroundPageMap;
-    WeakHashMap<WebInspectorUIProxy, Ref<API::InspectorExtension>> m_inspectorExtensionMap;
+    WeakHashMap<WebInspectorUIProxy, InspectorContext> m_inspectorContextMap;
 #endif
 
     HashMap<Ref<WebExtensionMatchPattern>, UserScriptVector> m_injectedScriptsPerPatternMap;
