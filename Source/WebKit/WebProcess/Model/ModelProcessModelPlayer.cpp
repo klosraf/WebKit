@@ -63,12 +63,6 @@ ALWAYS_INLINE void ModelProcessModelPlayer::send(T&& message)
     WebProcess::singleton().modelProcessModelPlayerManager().modelProcessConnection().connection().send(std::forward<T>(message), m_id);
 }
 
-bool ModelProcessModelPlayer::modelProcessEnabled() const
-{
-    RefPtr strongPage = m_page.get();
-    return strongPage && strongPage->corePage() && strongPage->corePage()->settings().modelElementEnabled() && strongPage->corePage()->settings().modelProcessEnabled();
-}
-
 // MARK: - Messages
 
 void ModelProcessModelPlayer::didCreateLayer(WebCore::LayerHostingContextIdentifier identifier)

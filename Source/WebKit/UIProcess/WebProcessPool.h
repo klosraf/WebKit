@@ -397,7 +397,8 @@ public:
 
     void createModelProcessConnection(WebProcessProxy&, IPC::Connection::Handle&&, WebKit::ModelProcessConnectionParameters&&);
 
-    Ref<ModelProcessProxy> ensureProtectedModelProcess(WebProcessProxy& requestingWebProcess);
+    ModelProcessProxy& ensureModelProcess();
+    Ref<ModelProcessProxy> ensureProtectedModelProcess();
     ModelProcessProxy* modelProcess() const { return m_modelProcess.get(); }
 #endif
 
@@ -691,10 +692,6 @@ private:
     void initializeHardwareKeyboardAvailability();
     void hardwareKeyboardAvailabilityChanged();
     void setCachedHardwareKeyboardState(HardwareKeyboardState);
-#endif
-
-#if ENABLE(MODEL_PROCESS)
-    ModelProcessProxy& ensureModelProcess();
 #endif
 
     Ref<API::ProcessPoolConfiguration> m_configuration;
