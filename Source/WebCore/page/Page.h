@@ -1215,6 +1215,8 @@ public:
     WEBCORE_EXPORT bool isFullscreenManagerEnabled() const;
 #endif
 
+    WEBCORE_EXPORT bool isAlwaysOnLoggingAllowed() const;
+
 private:
     explicit Page(PageConfiguration&&);
 
