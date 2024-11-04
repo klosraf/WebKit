@@ -2166,9 +2166,6 @@ void NetworkProcess::findPendingDownloadLocation(NetworkDataTask& networkDataTas
         if (destination.isEmpty())
             return completionHandler(PolicyAction::Ignore);
         networkDataTask->setPendingDownloadLocation(destination, WTFMove(sandboxExtensionHandle), allowOverwrite == AllowOverwrite::Yes);
-        completionHandler(PolicyAction::Download);
-        if (networkDataTask->state() == NetworkDataTask::State::Canceling || networkDataTask->state() == NetworkDataTask::State::Completed)
-            return;
 
 #if PLATFORM(COCOA)
         URL publishURL;
@@ -2183,6 +2180,11 @@ void NetworkProcess::findPendingDownloadLocation(NetworkDataTask& networkDataTas
             publishDownloadProgress(downloadID, publishURL, WTFMove(placeholderSandboxExtensionHandle));
 #endif // HAVE(MODERN_DOWNLOADPROGRESS)
 #endif // PLATFORM(COCOA)
+
+        completionHandler(PolicyAction::Download);
+        if (networkDataTask->state() == NetworkDataTask::State::Canceling || networkDataTask->state() == NetworkDataTask::State::Completed)
+            return;
+
         if (downloadManager().download(downloadID)) {
             // The completion handler already called dataTaskBecameDownloadTask().
             return;
