@@ -252,8 +252,6 @@ struct PerWebProcessState {
     RetainPtr<NSMapTable<NSUUID *, WTTextSuggestion *>> _writingToolsTextSuggestions;
     RetainPtr<WTSession> _activeWritingToolsSession;
 
-    RetainPtr<WKIntelligenceTextEffectCoordinator> _intelligenceTextEffectCoordinator;
-
     NSUInteger _partialIntelligenceTextAnimationCount;
     BOOL _writingToolsTextReplacementsFinished;
 #endif
