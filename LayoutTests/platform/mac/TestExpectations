@@ -2421,3 +2421,8 @@ imported/w3c/web-platform-tests/css/css-writing-modes/text-orientation-upright-s
 
 # rdar://137266760 (StabilityTracer: com.apple.WebKit.GPU.Development at com.apple.WebCore:  WebCore::CoreAudioSharedUnit::setupAudioUnit)
 [ Debug ] http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html [ Crash ]
+
+[ Sequoia arm64 ] http/tests/media/fairplay/legacy-fairplay-mse-muxed-nowait.html [ Failure ]
+
+# Modern AVContentKeySession is only available on Sonoma
+[ Ventura Sonoma ] http/tests/media/fairplay/legacy-fairplay-mse-muxed-nowait.html [ Skip ]
