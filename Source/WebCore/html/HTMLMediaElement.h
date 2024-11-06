@@ -759,6 +759,8 @@ protected:
     bool videoFullscreenStandby() const { return m_videoFullscreenStandby; }
     void setVideoFullscreenStandbyInternal(bool videoFullscreenStandby) { m_videoFullscreenStandby = videoFullscreenStandby; }
 
+    void ignoreFullscreenPermissionPolicyOnNextCallToEnterFullscreen() { m_ignoreFullscreenPermissionsPolicy = true; }
+
 protected:
     // ActiveDOMObject
     void stop() override;
@@ -1418,6 +1420,8 @@ private:
     Atomic<unsigned> m_remainingReadyStateChangedAttempts;
 
     std::unique_ptr<PausableIntervalTimer> m_watchtimeTimer;
+
+    bool m_ignoreFullscreenPermissionsPolicy { false };
 };
 
 String convertEnumerationToString(HTMLMediaElement::AutoplayEventPlaybackState);
