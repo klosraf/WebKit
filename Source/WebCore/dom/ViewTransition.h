@@ -216,6 +216,7 @@ private:
 
     // ActiveDOMObject.
     void stop() final;
+    bool virtualHasPendingActivity() const final;
 
     bool isCrossDocument() { return m_isCrossDocument; }
 
