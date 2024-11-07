@@ -7798,6 +7798,12 @@ void WebPage::didSameDocumentNavigationForFrame(WebFrame& frame)
 #endif
 }
 
+void WebPage::didNavigateWithinPageForFrame(WebFrame& frame)
+{
+    if (frame.isMainFrame())
+        m_pendingNavigationID = std::nullopt;
+}
+
 void WebPage::testProcessIncomingSyncMessagesWhenWaitingForSyncReply(CompletionHandler<void(bool)>&& reply)
 {
     RELEASE_ASSERT(IPC::UnboundedSynchronousIPCScope::hasOngoingUnboundedSyncIPC());
