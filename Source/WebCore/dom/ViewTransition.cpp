@@ -206,11 +206,6 @@ void ViewTransition::skipViewTransition(ExceptionOr<JSC::JSValue>&& reason)
     });
 }
 
-bool ViewTransition::virtualHasPendingActivity() const
-{
-    return m_phase != ViewTransitionPhase::Done;
-}
-
 // https://drafts.csswg.org/css-view-transitions/#ViewTransition-skipTransition
 void ViewTransition::skipTransition()
 {
