@@ -176,6 +176,7 @@ struct ModuleInformation : public ThreadSafeRefCounted<ModuleInformation> {
     Vector<TypeIndex> importExceptionTypeIndices;
     Vector<TypeIndex> internalExceptionTypeIndices;
     Vector<Ref<TypeDefinition>> typeSignatures;
+    Vector<Ref<TypeDefinition>> recursionGroups;
 
     MemoryInformation memory;
 
