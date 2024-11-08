@@ -10030,7 +10030,14 @@ void Document::addTopLayerElement(Element& element)
         auto* dialogElement = dynamicDowncast<HTMLDialogElement>(*candidatePopover);
         if (dialogElement && dialogElement->isModal())
             return;
+#if PLATFORM(IOS_FAMILY) && ENABLE(TOUCH_EVENTS)
+        bool neededEventHandling = needsPointerEventHandlingForPopover();
+#endif
         auto result = m_autoPopoverList.add(*candidatePopover);
+#if PLATFORM(IOS_FAMILY) && ENABLE(TOUCH_EVENTS)
+        if (!neededEventHandling)
+            invalidateRenderingDependentRegions();
+#endif
         RELEASE_ASSERT(result.isNewEntry);
     }
 }
@@ -10043,6 +10050,10 @@ void Document::removeTopLayerElement(Element& element)
     if (auto* candidatePopover = dynamicDowncast<HTMLElement>(element); candidatePopover && candidatePopover->isPopoverShowing() && candidatePopover->popoverState() == PopoverState::Auto) {
         auto didRemove = m_autoPopoverList.remove(*candidatePopover);
         RELEASE_ASSERT(didRemove);
+#if PLATFORM(IOS_FAMILY) && ENABLE(TOUCH_EVENTS)
+        if (!needsPointerEventHandlingForPopover())
+            invalidateRenderingDependentRegions();
+#endif
     }
 }
 
