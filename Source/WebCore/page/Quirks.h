@@ -118,6 +118,7 @@ public:
     bool needsWeChatScrollingQuirk() const;
 
     bool needsScrollbarWidthThinDisabledQuirk() const;
+    bool needsPrimeVideoUserSelectNoneQuirk() const;
 
     bool shouldOpenAsAboutBlank(const String&) const;
 
@@ -289,6 +290,7 @@ private:
 #if ENABLE(DESKTOP_CONTENT_MODE_QUIRKS)
     mutable std::optional<bool> m_needsZeroMaxTouchPointsQuirk;
 #endif
+    mutable std::optional<bool> m_needsPrimeVideoUserSelectNoneQuirk;
     Vector<RegistrableDomain> m_subFrameDomainsForStorageAccessQuirk;
 };
 
