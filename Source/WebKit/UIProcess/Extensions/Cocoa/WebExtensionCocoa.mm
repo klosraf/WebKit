@@ -46,7 +46,9 @@
 #import <UniformTypeIdentifiers/UTType.h>
 #import <WebCore/LocalizedStrings.h>
 #import <wtf/BlockPtr.h>
+#import <wtf/FileSystem.h>
 #import <wtf/HashSet.h>
+#import <wtf/Language.h>
 #import <wtf/NeverDestroyed.h>
 #import <wtf/cf/TypeCastsCF.h>
 #import <wtf/cocoa/VectorCocoa.h>
@@ -257,8 +259,19 @@ NSDictionary *WebExtension::manifest()
     if (!parseManifest(manifestData))
         return nil;
 
-    NSString *defaultLocale = [m_manifest objectForKey:defaultLocaleManifestKey];
-    m_defaultLocale = [NSLocale localeWithLocaleIdentifier:defaultLocale];
+    if (id defaultLocaleValue = m_manifest.get()[defaultLocaleManifestKey]) {
+        if (auto *defaultLocale = dynamic_objc_cast<NSString>(defaultLocaleValue)) {
+            auto parsedLocale = parseLocale(defaultLocale);
+            if (!parsedLocale.languageCode.isEmpty()) {
+                if (supportedLocales().contains(String(defaultLocale)))
+                    m_defaultLocale = defaultLocale;
+                else
+                    recordError(createError(Error::InvalidDefaultLocale, WEB_UI_STRING("Unable to find `default_locale` in “_locales” folder.", "WKWebExtensionErrorInvalidManifestEntry description for missing default_locale")));
+            } else
+                recordError(createError(Error::InvalidDefaultLocale));
+        } else
+            recordError(createError(Error::InvalidDefaultLocale));
+    }
 
     m_localization = [[_WKWebExtensionLocalization alloc] initWithWebExtension:*this];
 
@@ -650,6 +663,8 @@ static WKWebExtensionError toAPI(WebExtension::Error error)
         return WKWebExtensionErrorInvalidManifestEntry;
     case WebExtension::Error::InvalidDeclarativeNetRequest:
         return WKWebExtensionErrorInvalidDeclarativeNetRequestEntry;
+    case WebExtension::Error::InvalidDefaultLocale:
+        return WKWebExtensionErrorInvalidManifestEntry;
     case WebExtension::Error::InvalidDescription:
         return WKWebExtensionErrorInvalidManifestEntry;
     case WebExtension::Error::InvalidExternallyConnectable:
@@ -745,6 +760,10 @@ ALLOW_NONLITERAL_FORMAT_BEGIN
         else
             localizedDescription = WEB_UI_STRING("Unable to parse `declarativeNetRequest` rules because of an unexpected error.", "WKWebExtensionErrorInvalidDeclarativeNetRequest description");
 ALLOW_NONLITERAL_FORMAT_END
+        break;
+
+    case Error::InvalidDefaultLocale:
+        localizedDescription = WEB_UI_STRING("Empty or invalid `default_locale` manifest entry.", "WKWebExtensionErrorInvalidManifestEntry description for default_locale");
         break;
 
     case Error::InvalidDescription:
@@ -855,12 +874,60 @@ _WKWebExtensionLocalization *WebExtension::localization()
     return m_localization.get();
 }
 
-NSLocale *WebExtension::defaultLocale()
+const Vector<String>& WebExtension::supportedLocales()
+{
+    if (!m_supportedLocales.isEmpty())
+        return m_supportedLocales;
+
+    auto localesString = "_locales/"_s;
+    auto localeDirectoryPath = URL(resourceFileURLForPath(String(localesString))).fileSystemPath();
+    if (!localeDirectoryPath.isEmpty()) {
+        m_supportedLocales = FileSystem::listDirectory(localeDirectoryPath);
+        return m_supportedLocales;
+    }
+
+    // For tests that don't have a file system location, check the resource cache.
+    auto prefixLength = localesString.length();
+    for (NSString *key in m_resources.get()) {
+        String path = key;
+        if (!path.startsWith(localesString))
+            continue;
+
+        auto localeEnd = path.find('/', prefixLength);
+        if (localeEnd == notFound)
+            continue;
+
+        auto locale = path.substring(prefixLength, localeEnd - prefixLength);
+        if (!m_supportedLocales.contains(locale))
+            m_supportedLocales.append(locale);
+    }
+
+    return m_supportedLocales;
+}
+
+const String& WebExtension::defaultLocale()
 {
     if (!manifestParsedSuccessfully())
-        return nil;
+        return nullString();
 
-    return m_defaultLocale.get();
+    return m_defaultLocale;
+}
+
+String WebExtension::bestMatchLocale()
+{
+    const auto& supportedLocales = this->supportedLocales();
+    if (supportedLocales.isEmpty())
+        return nullString();
+
+    if (supportedLocales.size() == 1)
+        return supportedLocales.first();
+
+    bool exactMatch = false;
+    auto bestMatchIndex = indexOfBestMatchingLanguageInList(defaultLanguage(ShouldMinimizeLanguages::No), supportedLocales, exactMatch);
+    if (bestMatchIndex != notFound)
+        return supportedLocales[bestMatchIndex];
+
+    return defaultLocale();
 }
 
 NSString *WebExtension::displayName()

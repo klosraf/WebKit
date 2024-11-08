@@ -98,6 +98,7 @@ public:
         InvalidContentScripts,
         InvalidContentSecurityPolicy,
         InvalidDeclarativeNetRequest,
+        InvalidDefaultLocale,
         InvalidDescription,
         InvalidExternallyConnectable,
         InvalidIcon,
@@ -219,7 +220,10 @@ public:
     NSData *resourceDataForPath(NSString *, NSError **, CacheResult = CacheResult::No, SuppressNotFoundErrors = SuppressNotFoundErrors::No);
 
     _WKWebExtensionLocalization *localization();
-    NSLocale *defaultLocale();
+
+    const Vector<String>& supportedLocales();
+    const String& defaultLocale();
+    String bestMatchLocale();
 
     NSString *displayName();
     NSString *displayShortName();
@@ -361,7 +365,8 @@ private:
     RetainPtr<NSDictionary> m_manifest;
     RetainPtr<NSMutableDictionary> m_resources;
 
-    RetainPtr<NSLocale> m_defaultLocale;
+    String m_defaultLocale;
+    Vector<String> m_supportedLocales;
     RetainPtr<_WKWebExtensionLocalization> m_localization;
 
     RetainPtr<NSMutableArray> m_errors;
