@@ -710,7 +710,7 @@ protected:
         return LayoutUnit((inlineSize - borderPaddingInlineSum) / aspectRatio) + borderPaddingBlockSum;
     }
 
-    void computePreferredLogicalWidths(const Length& minWidth, const Length& maxWidth, LayoutUnit borderAndPadding);
+    void computePreferredLogicalWidths(const Length& minLogicalWidth, const Length& maxLogicalWidth, LayoutUnit borderAndPaddingLogicalWidth);
     
     bool isAspectRatioDegenerate(double aspectRatio) const { return !aspectRatio || isnan(aspectRatio); }
     
@@ -758,6 +758,7 @@ private:
     // These values are used in shrink-to-fit layout systems.
     // These include tables, positioned objects, floats and flexible boxes.
     virtual void computePreferredLogicalWidths();
+    bool shouldComputePreferredLogicalWidthsFromStyle() const;
 
     LayoutRect frameRectForStickyPositioning() const override { return frameRect(); }
 
