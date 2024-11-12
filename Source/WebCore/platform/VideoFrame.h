@@ -113,7 +113,7 @@ public:
 
     void initializeCharacteristics(MediaTime presentationTime, bool isMirrored, Rotation);
 
-    void draw(GraphicsContext&, const FloatRect&, ImageOrientation, bool shouldDiscardAlpha);
+    void paintInContext(GraphicsContext&, const FloatRect&, const ImageOrientation&, bool shouldDiscardAlpha);
 
     const PlatformVideoColorSpace& colorSpace() const { return m_colorSpace; }
 

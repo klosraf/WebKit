@@ -350,7 +350,12 @@ void RecorderImpl::recordFillEllipse(const FloatRect& rect)
 }
 
 #if ENABLE(VIDEO)
-void RecorderImpl::recordDrawVideoFrame(VideoFrame&, const FloatRect&, ImageOrientation, bool)
+void RecorderImpl::recordPaintFrameForMedia(MediaPlayer& player, const FloatRect& destination)
+{
+    append(PaintFrameForMedia(player.identifier(), destination));
+}
+
+void RecorderImpl::recordPaintVideoFrame(VideoFrame&, const FloatRect&, bool /* shouldDiscardAlpha */)
 {
     // FIXME: TODO
 }

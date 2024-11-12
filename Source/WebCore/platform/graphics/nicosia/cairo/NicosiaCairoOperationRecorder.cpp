@@ -1191,10 +1191,10 @@ void CairoOperationRecorder::append(std::unique_ptr<PaintingOperation>&& command
 }
 
 #if ENABLE(VIDEO)
-void CairoOperationRecorder::drawVideoFrame(VideoFrame& frame, const FloatRect& destination, ImageOrientation orientation, bool shouldDiscardAlpha)
+void CairoOperationRecorder::paintFrameForMedia(MediaPlayer& player, const FloatRect& destination)
 {
     // FIXME: Not implemented.
-    GraphicsContext::drawVideoFrame(frame, destination, orientation, shouldDiscardAlpha);
+    GraphicsContext::paintFrameForMedia(player, destination);
 }
 #endif
 

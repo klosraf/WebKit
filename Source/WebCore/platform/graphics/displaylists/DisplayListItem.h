@@ -113,6 +113,9 @@ class StrokeClosedArc;
 class StrokeQuadCurve;
 class StrokeBezierCurve;
 #endif
+#if ENABLE(VIDEO)
+class PaintFrameForMedia;
+#endif
 #if USE(CG)
 class ApplyFillPattern;
 class ApplyStrokePattern;
@@ -189,6 +192,9 @@ using Item = std::variant
     , StrokeClosedArc
     , StrokeQuadCurve
     , StrokeBezierCurve
+#endif
+#if ENABLE(VIDEO)
+    , PaintFrameForMedia
 #endif
 #if USE(CG)
     , ApplyFillPattern

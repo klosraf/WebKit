@@ -46,6 +46,7 @@
 #include "StreamMessageReceiver.h"
 #include "StreamServerConnection.h"
 #include <WebCore/ImageBufferPixelFormat.h>
+#include <WebCore/MediaPlayerIdentifier.h>
 #include <WebCore/ProcessIdentity.h>
 #include <WebCore/RenderingResourceIdentifier.h>
 #include <wtf/HashMap.h>

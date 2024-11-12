@@ -40,7 +40,6 @@
 #include "JSDOMPromiseDeferred.h"
 #include "LocalFrame.h"
 #include "Logging.h"
-#include "MediaPlayerPrivate.h"
 #include "Page.h"
 #include "Performance.h"
 #include "PictureInPictureSupport.h"
@@ -346,14 +345,6 @@ RefPtr<ImageBuffer> HTMLVideoElement::createBufferForPainting(const FloatSize& s
     return ImageBuffer::create(size, RenderingPurpose::MediaPainting, 1, colorSpace, pixelFormat, bufferOptionsForRendingMode(renderingMode), hostWindow);
 }
 
-void HTMLVideoElement::paint(GraphicsContext& context, const FloatRect& destRect)
-{
-    RefPtr player = this->player();
-    if (!player)
-        return;
-    player->paint(context, destRect);
-}
-
 void HTMLVideoElement::paintCurrentFrameInContext(GraphicsContext& context, const FloatRect& destRect)
 {
     RefPtr player = this->player();
@@ -364,7 +355,7 @@ void HTMLVideoElement::paintCurrentFrameInContext(GraphicsContext& context, cons
         player->setVisibleForCanvas(true); // Make player visible or it won't draw.
         visibilityStateChanged();
     }
-    player->paintCurrentFrameInContext(context, destRect);
+    context.paintFrameForMedia(*player, destRect);
 }
 
 bool HTMLVideoElement::hasAvailableVideoFrame() const
