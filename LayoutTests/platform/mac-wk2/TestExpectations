@@ -1856,3 +1856,6 @@ fast/scrolling/mac/scrollbars/scrollbar-state.html [ Failure ]
 # webkit.org/b/279359 http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html  is asserting on debug
 [ Sonoma+ Debug ] http/wpt/mediastream/mediastreamtrackprocessor-videoframe-timestamp.html  [ Skip ]
 [ Sonoma+ Debug ] http/wpt/mediasession/voiceActivityDetection.html [ Skip ]
+
+# rdar://139687069 (REGRESSION(283286.476@safari-7620-branch): [EWS Sequoia] ASSERTION FAILED: !m_messageReceiverMapCount in http/tests/navigation/page-cache-mediastream.html)
+[ Debug ] http/tests/navigation/page-cache-mediastream.html [ Crash ]
