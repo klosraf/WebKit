@@ -119,6 +119,7 @@ public:
 
     bool needsScrollbarWidthThinDisabledQuirk() const;
     bool needsPrimeVideoUserSelectNoneQuirk() const;
+    bool needsBodyScrollbarWidthNoneDisabledQuirk() const;
 
     bool shouldOpenAsAboutBlank(const String&) const;
 
@@ -287,6 +288,7 @@ private:
     mutable std::optional<bool> m_shouldIgnorePlaysInlineRequirementQuirk;
     mutable std::optional<bool> m_needsRelaxedCorsMixedContentCheckQuirk;
     mutable std::optional<bool> m_needsScrollbarWidthThinDisabledQuirk;
+    mutable std::optional<bool> m_needsBodyScrollbarWidthNoneDisabledQuirk;
 #if ENABLE(DESKTOP_CONTENT_MODE_QUIRKS)
     mutable std::optional<bool> m_needsZeroMaxTouchPointsQuirk;
 #endif
