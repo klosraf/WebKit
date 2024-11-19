@@ -322,6 +322,12 @@ static bool canAttemptTextRecognitionForNonImageElements(const WebKit::Interacti
 namespace WebKit {
 using namespace WebCore;
 
+enum class IgnoreTapGestureReason : uint8_t {
+    None,
+    ToggleEditMenu,
+    DeferToScrollView,
+};
+
 static NSArray<NSString *> *supportedPlainTextPasteboardTypes()
 {
     static NeverDestroyed supportedTypes = [] {
@@ -3215,7 +3221,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     return pointIsInSelectionRect;
 }
 
-- (BOOL)_shouldToggleSelectionCommandsAfterTapAt:(CGPoint)point
+- (BOOL)_shouldToggleEditMenuAfterTapAt:(CGPoint)point
 {
     if (_lastSelectionDrawingInfo.selectionGeometries.isEmpty())
         return NO;
@@ -3266,21 +3272,34 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 {
     CGPoint point = [gestureRecognizer locationInView:self];
 
-    auto shouldAcknowledgeTap = [&](WKScrollViewTrackingTapGestureRecognizer *tapGesture) -> BOOL {
-        if ([self _shouldToggleSelectionCommandsAfterTapAt:point])
-            return NO;
-        auto scrollView = tapGesture.lastTouchedScrollView;
-        return ![self _isPanningScrollViewOrAncestor:scrollView] && ![self _isInterruptingDecelerationForScrollViewOrAncestor:scrollView];
+    auto ignoreTapGestureReason = [&](WKScrollViewTrackingTapGestureRecognizer *tapGesture) -> WebKit::IgnoreTapGestureReason {
+        if ([self _shouldToggleEditMenuAfterTapAt:point])
+            return WebKit::IgnoreTapGestureReason::ToggleEditMenu;
+
+        RetainPtr scrollView = [tapGesture lastTouchedScrollView];
+        if ([self _isPanningScrollViewOrAncestor:scrollView.get()] || [self _isInterruptingDecelerationForScrollViewOrAncestor:scrollView.get()])
+            return WebKit::IgnoreTapGestureReason::DeferToScrollView;
+
+        return WebKit::IgnoreTapGestureReason::None;
     };
 
-    if (gestureRecognizer == _singleTapGestureRecognizer)
-        return shouldAcknowledgeTap(_singleTapGestureRecognizer.get());
+    if (gestureRecognizer == _singleTapGestureRecognizer) {
+        switch (ignoreTapGestureReason(_singleTapGestureRecognizer.get())) {
+        case WebKit::IgnoreTapGestureReason::ToggleEditMenu:
+            _page->clearSelectionAfterTappingSelectionHighlightIfNeeded(point);
+            FALLTHROUGH;
+        case WebKit::IgnoreTapGestureReason::DeferToScrollView:
+            return NO;
+        case WebKit::IgnoreTapGestureReason::None:
+            return YES;
+        }
+    }
 
     if (gestureRecognizer == _keyboardDismissalGestureRecognizer) {
         return self._hasFocusedElement
             && !self.hasHiddenContentEditable
             && !CGRectContainsPoint(self.selectionClipRect, point)
-            && shouldAcknowledgeTap(_keyboardDismissalGestureRecognizer.get());
+            && ignoreTapGestureReason(_keyboardDismissalGestureRecognizer.get()) == WebKit::IgnoreTapGestureReason::None;
     }
 
     if (gestureRecognizer == _doubleTapGestureRecognizerForDoubleClick) {
