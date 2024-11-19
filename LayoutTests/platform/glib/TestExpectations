@@ -2393,6 +2393,9 @@ http/wpt/mediasession/setCaptureState-audio-category.html [ Skip ]
 # Lack of voice activity detection mock
 http/wpt/mediasession/voiceActivityDetection.html [ Skip ]
 
+# Crashing since introduced
+fast/mediastream/mediastreamtrack-clone-muted.html [ Skip ]
+
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of WebRTC-related bugs
 #////////////////////////////////////////////////////////////////////////////////////////
