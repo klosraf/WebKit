@@ -417,14 +417,13 @@ bool Quirks::isAmazon() const
     return PublicSuffixStore::singleton().topPrivatelyControlledDomain(m_document->topDocument().url().host()).startsWith("amazon."_s);
 }
 
-#if ENABLE(TOUCH_EVENTS)
-
 bool Quirks::isGoogleMaps() const
 {
     auto& url = m_document->topDocument().url();
     return PublicSuffixStore::singleton().topPrivatelyControlledDomain(url.host()).startsWith("google."_s) && startsWithLettersIgnoringASCIICase(url.path(), "/maps/"_s);
 }
 
+#if ENABLE(TOUCH_EVENTS)
 // rdar://49124313
 // desmos.com rdar://47068176
 // flipkart.com rdar://49648520
@@ -775,6 +774,22 @@ bool Quirks::needsWeChatScrollingQuirk() const
 {
 #if PLATFORM(IOS) || PLATFORM(VISION)
     return needsQuirks() && !linkedOnOrAfterSDKWithBehavior(SDKAlignedBehavior::NoWeChatScrollingQuirk) && IOSApplication::isWechat();
+#else
+    return false;
+#endif
+}
+
+// maps.google.com rdar://67358928
+bool Quirks::needsGoogleMapsScrollingQuirk() const
+{
+#if PLATFORM(IOS_FAMILY)
+    if (!needsQuirks())
+        return false;
+
+    if (!m_needsGoogleMapsScrollingQuirk)
+        m_needsGoogleMapsScrollingQuirk = isGoogleMaps();
+
+    return *m_needsGoogleMapsScrollingQuirk;
 #else
     return false;
 #endif

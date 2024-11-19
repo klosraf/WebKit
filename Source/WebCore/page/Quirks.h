@@ -116,6 +116,7 @@ public:
     bool needsFullscreenDisplayNoneQuirk() const;
     bool needsFullscreenObjectFitQuirk() const;
     bool needsWeChatScrollingQuirk() const;
+    bool needsGoogleMapsScrollingQuirk() const;
 
     bool needsScrollbarWidthThinDisabledQuirk() const;
     bool needsPrimeVideoUserSelectNoneQuirk() const;
@@ -221,9 +222,7 @@ private:
     bool isYoutubeEmbedDomain() const;
 
     bool isAmazon() const;
-#if ENABLE(TOUCH_EVENTS)
     bool isGoogleMaps() const;
-#endif
 
     RefPtr<Document> protectedDocument() const;
 
@@ -239,6 +238,7 @@ private:
     mutable std::optional<bool> m_needsFullscreenDisplayNoneQuirk;
     mutable std::optional<bool> m_needsFullscreenObjectFitQuirk;
     mutable std::optional<bool> m_shouldAvoidPastingImagesAsWebContent;
+    mutable std::optional<bool> m_needsGoogleMapsScrollingQuirk;
 #endif
 #if ENABLE(TOUCH_EVENTS)
     enum class ShouldDispatchSimulatedMouseEvents : uint8_t {
