@@ -1571,6 +1571,8 @@ void WebPageProxy::initializeWebPage(const Site& site)
     if (RefPtr networkProcess = websiteDataStore().networkProcessIfExists()) {
         if (m_pageToCloneSessionStorageFrom)
             networkProcess->send(Messages::NetworkProcess::CloneSessionStorageForWebPage(sessionID(), m_pageToCloneSessionStorageFrom->identifier(), identifier()), 0);
+        if (m_configuration->shouldRelaxThirdPartyCookieBlocking() == ShouldRelaxThirdPartyCookieBlocking::Yes)
+            networkProcess->send(Messages::NetworkProcess::SetShouldRelaxThirdPartyCookieBlockingForPage(identifier()), 0);
     }
     m_pageToCloneSessionStorageFrom = nullptr;
 
@@ -7881,6 +7883,8 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
         if (RefPtr networkProcess = websiteDataStore().networkProcessIfExists()) {
             if (!wantsNoOpener)
                 networkProcess->send(Messages::NetworkProcess::CloneSessionStorageForWebPage(sessionID(), identifier(), newPage->identifier()), 0);
+            if (m_configuration->shouldRelaxThirdPartyCookieBlocking() == ShouldRelaxThirdPartyCookieBlocking::Yes)
+                networkProcess->send(Messages::NetworkProcess::SetShouldRelaxThirdPartyCookieBlockingForPage(newPage->identifier()), 0);
         }
 
         reply(newPage->webPageIDInMainFrameProcess(), newPage->creationParameters(protectedLegacyMainFrameProcess(), *newPage->drawingArea(), newPage->m_mainFrame->frameID(), std::nullopt));

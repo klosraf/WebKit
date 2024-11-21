@@ -344,7 +344,6 @@ static void addParametersShared(const LocalFrame* frame, NetworkResourceLoadPara
 
     if (auto* page = frame->page()) {
         parameters.pageHasResourceLoadClient = page->hasResourceLoadClient();
-        parameters.shouldRelaxThirdPartyCookieBlocking = page->shouldRelaxThirdPartyCookieBlocking();
         page->logMediaDiagnosticMessage(parameters.request.httpBody());
 
 #if ENABLE(WK_WEB_EXTENSIONS)

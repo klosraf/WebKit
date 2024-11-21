@@ -435,6 +435,8 @@ public:
 
     bool enableModernDownloadProgress() const { return m_enableModernDownloadProgress; }
 
+    WebCore::ShouldRelaxThirdPartyCookieBlocking shouldRelaxThirdPartyCookieBlockingForPage(std::optional<WebPageProxyIdentifier>) const;
+
 private:
     // CheckedPtr interface
     uint32_t ptrCount() const final { return CanMakeCheckedPtr::ptrCount(); }
@@ -543,6 +545,8 @@ private:
 #endif
     void stopRunLoopIfNecessary();
 
+    void setShouldRelaxThirdPartyCookieBlockingForPage(WebPageProxyIdentifier);
+
     // Connections to WebProcesses.
     HashMap<WebCore::ProcessIdentifier, Ref<NetworkConnectionToWebProcess>> m_webProcessConnections;
 
@@ -592,6 +596,7 @@ private:
     HashMap<WebCore::PageIdentifier, Vector<WebCore::UserContentURLPattern>> m_extensionCORSDisablingPatterns;
     HashSet<RefPtr<NetworkStorageManager>> m_closingStorageManagers;
     HashSet<String> m_localhostAliasesForTesting;
+    HashSet<WebPageProxyIdentifier> m_pagesWithRelaxedThirdPartyCookieBlocking;
 
     bool m_privateClickMeasurementEnabled { true };
     bool m_ftpEnabled { false };
