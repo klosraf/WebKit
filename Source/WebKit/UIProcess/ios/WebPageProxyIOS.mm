@@ -1471,6 +1471,11 @@ WebContentMode WebPageProxy::effectiveContentModeAfterAdjustingPolicies(API::Web
         m_preferFasterClickOverDoubleTap = true;
     }
 
+#if ENABLE(TOUCH_EVENTS)
+    if (m_preferences->needsSiteSpecificQuirks() && Quirks::shouldOmitTouchEventDOMAttributesForDesktopWebsite(request.url()))
+        policies.setOverrideTouchEventDOMAttributesEnabled(false);
+#endif
+
     return WebContentMode::Desktop;
 }
 

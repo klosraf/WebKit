@@ -2012,4 +2012,13 @@ bool Quirks::needsZeroMaxTouchPointsQuirk() const
     return false;
 }
 
+#if ENABLE(TOUCH_EVENTS)
+
+bool Quirks::shouldOmitTouchEventDOMAttributesForDesktopWebsite(const URL& requestURL)
+{
+    return requestURL.host() == "secure.chase.com"_s;
+}
+
+#endif
+
 }
