@@ -35,6 +35,7 @@
 #import "SharedBuffer.h"
 #import "WebMAudioUtilitiesCocoa.h"
 #import <CoreMedia/CMFormatDescription.h>
+#import <numeric>
 #import <pal/avfoundation/MediaTimeAVFoundation.h>
 #import <pal/spi/cocoa/AudioToolboxSPI.h>
 #import <wtf/Scope.h>
@@ -198,6 +199,19 @@ RetainPtr<CMFormatDescriptionRef> createFormatDescriptionFromTrackInfo(const Tra
             extensionsKeys.append(kCVImageBufferYCbCrMatrixKey);
             extensionsValues.append(cmMatrix);
         }
+    }
+
+    RetainPtr<NSDictionary> pixelAspectRatioValues;
+    if (videoInfo.size != videoInfo.displaySize) {
+        uint32_t width = videoInfo.displaySize.width();
+        uint32_t height = videoInfo.displaySize.height();
+        auto gcd = std::gcd(width, height);
+        extensionsKeys.append(PAL::get_CoreMedia_kCMFormatDescriptionExtension_PixelAspectRatio());
+        pixelAspectRatioValues = @{
+            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing() : @(width / gcd),
+            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing() : @(height / gcd)
+        };
+        extensionsValues.append(pixelAspectRatioValues.get());
     }
 
     auto extensions = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, extensionsKeys.data(), extensionsValues.data(), extensionsKeys.size(), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
