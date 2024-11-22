@@ -786,7 +786,7 @@ public:
 
     void updateHeaderAndFooterLayersForDeviceScaleChange(float scaleFactor);
 
-    bool isTransparentOrFullyClipped(const WebCore::Element&) const;
+    bool isTransparentOrFullyClipped(const WebCore::Node&) const;
 #endif
 
     void didUpdateRendering();
