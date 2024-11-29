@@ -994,6 +994,9 @@ void NetworkConnectionToWebProcess::domCookiesForHost(const URL& url, Completion
 
 void NetworkConnectionToWebProcess::subscribeToCookieChangeNotifications(const String& host)
 {
+    MESSAGE_CHECK(HashSet<String>::isValidValue(host));
+    MESSAGE_CHECK(protectedNetworkProcess()->allowsFirstPartyForCookies(m_webProcessIdentifier, URL { host }) != NetworkProcess::AllowCookieAccess::Terminate);
+
     ASSERT(!m_hostsWithCookieListeners.contains(host));
     m_hostsWithCookieListeners.add(host);
 
@@ -1003,6 +1006,9 @@ void NetworkConnectionToWebProcess::subscribeToCookieChangeNotifications(const S
 
 void NetworkConnectionToWebProcess::unsubscribeFromCookieChangeNotifications(const String& host)
 {
+    MESSAGE_CHECK(HashSet<String>::isValidValue(host));
+    MESSAGE_CHECK(protectedNetworkProcess()->allowsFirstPartyForCookies(m_webProcessIdentifier, URL { host }) != NetworkProcess::AllowCookieAccess::Terminate);
+
     bool removed = m_hostsWithCookieListeners.remove(host);
     ASSERT_UNUSED(removed, removed);
 
