@@ -41,6 +41,7 @@ class HTMLElement;
 class HTMLVideoElement;
 class LayoutUnit;
 class LocalFrame;
+class Node;
 class PlatformMouseEvent;
 class RegistrableDomain;
 class SecurityOriginData;
@@ -219,6 +220,10 @@ public:
     bool needsZeroMaxTouchPointsQuirk() const;
     bool implicitMuteWhenVolumeSetToZero() const;
 
+#if PLATFORM(IOS_FAMILY)
+    WEBCORE_EXPORT bool shouldIgnoreContentObservationForClick(const Node&) const;
+#endif
+
 private:
     bool needsQuirks() const;
     bool isDomain(const String&) const;
@@ -243,6 +248,7 @@ private:
     mutable std::optional<bool> m_needsFullscreenObjectFitQuirk;
     mutable std::optional<bool> m_shouldAvoidPastingImagesAsWebContent;
     mutable std::optional<bool> m_needsGoogleMapsScrollingQuirk;
+    mutable std::optional<bool> m_mayNeedToIgnoreContentObservation;
 #endif
 #if ENABLE(TOUCH_EVENTS)
     enum class ShouldDispatchSimulatedMouseEvents : uint8_t {

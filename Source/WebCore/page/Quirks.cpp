@@ -26,6 +26,7 @@
 #include "config.h"
 #include "Quirks.h"
 
+#include "AccessibilityObject.h"
 #include "Attr.h"
 #include "DOMTokenList.h"
 #include "DeprecatedGlobalSettings.h"
@@ -41,6 +42,7 @@
 #include "HTMLCollection.h"
 #include "HTMLDivElement.h"
 #include "HTMLMetaElement.h"
+#include "HTMLNames.h"
 #include "HTMLObjectElement.h"
 #include "HTMLVideoElement.h"
 #include "JSEventListener.h"
@@ -2038,5 +2040,38 @@ bool Quirks::shouldOmitTouchEventDOMAttributesForDesktopWebsite(const URL& reque
 }
 
 #endif
+
+#if PLATFORM(IOS_FAMILY)
+
+bool Quirks::shouldIgnoreContentObservationForClick(const Node& targetNode) const
+{
+    if (!needsQuirks())
+        return false;
+
+    if (!m_mayNeedToIgnoreContentObservation.value_or(true))
+        return false;
+
+    auto accessibilityRole = [](const Element& element) {
+        return AccessibilityObject::ariaRoleToWebCoreRole(element.getAttribute(HTMLNames::roleAttr));
+    };
+
+    if (isDomain("walmart.com"_s)) {
+        m_mayNeedToIgnoreContentObservation = true;
+        RefPtr target = dynamicDowncast<Element>(targetNode);
+        if (!target || accessibilityRole(*target) != AccessibilityRole::Button)
+            return false;
+
+        RefPtr parent = target->parentElementInComposedTree();
+        if (!parent || accessibilityRole(*parent) != AccessibilityRole::ListItem)
+            return false;
+
+        return true;
+    }
+
+    m_mayNeedToIgnoreContentObservation = false;
+    return false;
+}
+
+#endif // PLATFORM(IOS_FAMILY)
 
 }
