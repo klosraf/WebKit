@@ -216,8 +216,8 @@ public:
     String scriptToEvaluateBeforeRunningScriptFromURL(const URL&);
 
     bool shouldHideCoarsePointerCharacteristics() const;
-
     bool needsZeroMaxTouchPointsQuirk() const;
+    bool implicitMuteWhenVolumeSetToZero() const;
 
 private:
     bool needsQuirks() const;
@@ -297,6 +297,11 @@ private:
     mutable std::optional<bool> m_needsZeroMaxTouchPointsQuirk;
 #endif
     mutable std::optional<bool> m_needsPrimeVideoUserSelectNoneQuirk;
+
+#if HAVE(MEDIA_VOLUME_PER_ELEMENT)
+    mutable std::optional<bool> m_implicitMuteWhenVolumeSetToZero;
+#endif
+
     Vector<RegistrableDomain> m_subFrameDomainsForStorageAccessQuirk;
 };
 
