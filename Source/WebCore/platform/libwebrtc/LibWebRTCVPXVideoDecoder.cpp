@@ -96,6 +96,7 @@ private:
     size_t m_pixelBufferPoolWidth { 0 };
     size_t m_pixelBufferPoolHeight { 0 };
     OSType m_pixelBufferPoolType;
+    const bool m_treatNoOutputAsError { true };
 };
 
 void LibWebRTCVPXVideoDecoder::create(Type type, const Config& config, CreateCallback&& callback, OutputCallback&& outputCallback)
@@ -154,7 +155,7 @@ Ref<VideoDecoder::DecodePromise> LibWebRTCVPXInternalVideoDecoder::decode(std::s
 
     auto error = m_internalDecoder->Decode(image, false, 0);
 
-    if (error)
+    if (error && (error != WEBRTC_VIDEO_CODEC_NO_OUTPUT || m_treatNoOutputAsError))
         return VideoDecoder::DecodePromise::createAndReject(makeString("VPx decoding failed with error "_s, error));
 
     return VideoDecoder::DecodePromise::createAndResolve();
@@ -183,6 +184,7 @@ LibWebRTCVPXInternalVideoDecoder::LibWebRTCVPXInternalVideoDecoder(LibWebRTCVPXV
     , m_useIOSurface(config.pixelBuffer == VideoDecoder::HardwareBuffer::Yes)
     , m_configuration(isVPx() ? createVPCodecConfigurationRecordFromVPCC(config.description) : std::nullopt)
     , m_resourceOwner(config.resourceOwner)
+    , m_treatNoOutputAsError(config.noOutputAsError == VideoDecoder::TreatNoOutputAsError::Yes)
 {
     m_internalDecoder->RegisterDecodeCompleteCallback(this);
     webrtc::VideoDecoder::Settings settings;
