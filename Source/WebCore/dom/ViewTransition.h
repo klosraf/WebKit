@@ -67,6 +67,7 @@ public:
     LayoutPoint oldLayerToLayoutOffset;
     LayoutSize oldSize;
     RefPtr<MutableStyleProperties> oldProperties;
+    bool initiallyIntersectsViewport { false };
 
     WeakStyleable newElement;
     LayoutRect newOverflowRect;
@@ -199,7 +200,7 @@ private:
     ViewTransition(Document&, RefPtr<ViewTransitionUpdateCallback>&&, Vector<AtomString>&&);
     ViewTransition(Document&, Vector<AtomString>&&);
 
-    Ref<MutableStyleProperties> copyElementBaseProperties(RenderLayerModelObject&, LayoutSize&);
+    Ref<MutableStyleProperties> copyElementBaseProperties(RenderLayerModelObject&, LayoutSize&, LayoutRect& overflowRect, bool& intersectsViewport);
     bool updatePropertiesForRenderer(CapturedElement&, RenderBoxModelObject*, const AtomString&);
 
     // Setup view transition sub-algorithms.
