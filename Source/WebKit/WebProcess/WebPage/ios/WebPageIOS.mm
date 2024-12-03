@@ -5552,6 +5552,40 @@ void WebPage::shouldDismissKeyboardAfterTapAtPoint(FloatPoint point, CompletionH
     completion(targetSize.width() >= minimumSizeForDismissal.width() && targetSize.height() >= minimumSizeForDismissal.height());
 }
 
+#if ENABLE(IOS_TOUCH_EVENTS)
+
+void WebPage::didSwallowClickEvent(const PlatformMouseEvent& event, Node& node)
+{
+    if (!m_userIsInteracting)
+        return;
+
+    if (event.type() != PlatformEventType::MouseReleased)
+        return;
+
+    if (event.syntheticClickType() != SyntheticClickType::NoTap)
+        return;
+
+    RefPtr element = dynamicDowncast<Element>(node);
+    if (!element)
+        return;
+
+    Ref document = node.document();
+    if (!document->quirks().shouldSynthesizeTouchEventsAfterNonSyntheticClick(node))
+        return;
+
+    bool isReplaced = false;
+    auto bounds = node.absoluteBoundingRect(&isReplaced);
+    if (bounds.isEmpty())
+        return;
+
+    callOnMainRunLoop([bounds, document = WTFMove(document)] mutable {
+        if (RefPtr frame = document->frame())
+            frame->checkedEventHandler()->dispatchSimulatedTouchEvent(roundedIntPoint(bounds.center()));
+    });
+}
+
+#endif // ENABLE(IOS_TOUCH_EVENTS)
+
 } // namespace WebKit
 
 #undef WEBPAGE_RELEASE_LOG

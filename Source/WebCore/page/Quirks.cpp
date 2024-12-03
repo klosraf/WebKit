@@ -2043,6 +2043,19 @@ bool Quirks::shouldOmitTouchEventDOMAttributesForDesktopWebsite(const URL& reque
 
 #if PLATFORM(IOS_FAMILY)
 
+bool Quirks::shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Node& target) const
+{
+    if (!needsQuirks())
+        return false;
+
+    if (target.nodeName() == "AVIA-BUTTON"_s && isDomain("cbssports.com"_s)) {
+        // Remove this once rdar://139478801 is resolved.
+        return true;
+    }
+
+    return false;
+}
+
 bool Quirks::shouldIgnoreContentObservationForClick(const Node& targetNode) const
 {
     if (!needsQuirks())

@@ -1825,6 +1825,8 @@ public:
 
     bool isAlwaysOnLoggingAllowed() const;
 
+    void didSwallowClickEvent(const WebCore::PlatformMouseEvent&, WebCore::Node&);
+
 private:
     WebPage(WebCore::PageIdentifier, WebPageCreationParameters&&);
 
@@ -2912,6 +2914,10 @@ private:
 inline void WebPage::platformWillPerformEditingCommand() { }
 inline bool WebPage::requiresPostLayoutDataForEditorState(const WebCore::LocalFrame&) const { return false; }
 inline void WebPage::prepareToRunModalJavaScriptDialog() { }
+#endif
+
+#if !ENABLE(IOS_TOUCH_EVENTS)
+inline void WebPage::didSwallowClickEvent(const WebCore::PlatformMouseEvent&, WebCore::Node&) { }
 #endif
 
 #if !PLATFORM(MAC)
