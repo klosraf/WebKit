@@ -35,7 +35,6 @@
 #import "SharedBuffer.h"
 #import "WebMAudioUtilitiesCocoa.h"
 #import <CoreMedia/CMFormatDescription.h>
-#import <numeric>
 #import <pal/avfoundation/MediaTimeAVFoundation.h>
 #import <pal/spi/cocoa/AudioToolboxSPI.h>
 #import <wtf/Scope.h>
@@ -204,13 +203,12 @@ RetainPtr<CMFormatDescriptionRef> createFormatDescriptionFromTrackInfo(const Tra
 
     RetainPtr<NSDictionary> pixelAspectRatioValues;
     if (videoInfo.size != videoInfo.displaySize) {
-        uint32_t width = videoInfo.displaySize.width();
-        uint32_t height = videoInfo.displaySize.height();
-        auto gcd = std::gcd(width, height);
+        double horizontalRatio = videoInfo.displaySize.width() / videoInfo.size.width();
+        double verticalRatio = videoInfo.displaySize.height() / videoInfo.size.height();
         extensionsKeys.append(PAL::get_CoreMedia_kCMFormatDescriptionExtension_PixelAspectRatio());
         pixelAspectRatioValues = @{
-            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing() : @(width / gcd),
-            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing() : @(height / gcd)
+            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing() : @(horizontalRatio),
+            (__bridge NSString*)PAL::get_CoreMedia_kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing() : @(verticalRatio)
         };
         extensionsValues.append(pixelAspectRatioValues.get());
     }
