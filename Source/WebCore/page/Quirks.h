@@ -225,6 +225,8 @@ public:
     WEBCORE_EXPORT bool shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Node&) const;
 #endif
 
+    bool needsBingGestureEventQuirk(EventTarget*) const;
+
 private:
     bool needsQuirks() const;
     bool isDomain(const String&) const;

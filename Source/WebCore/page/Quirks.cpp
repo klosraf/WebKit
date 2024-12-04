@@ -2087,4 +2087,21 @@ bool Quirks::shouldIgnoreContentObservationForClick(const Node& targetNode) cons
 
 #endif // PLATFORM(IOS_FAMILY)
 
+// bing.com rdar://126573838
+bool Quirks::needsBingGestureEventQuirk(EventTarget* target) const
+{
+    if (!needsQuirks())
+        return false;
+
+    auto url = m_document->topDocument().url();
+    if (url.host() == "www.bing.com"_s && startsWithLettersIgnoringASCIICase(url.path(), "/maps"_s)) {
+        if (RefPtr element = dynamicDowncast<Element>(target)) {
+            static MainThreadNeverDestroyed<const AtomString> mapClass("atlas-map-canvas"_s);
+            return element->hasClassName(mapClass.get());
+        }
+    }
+
+    return false;
+}
+
 }
