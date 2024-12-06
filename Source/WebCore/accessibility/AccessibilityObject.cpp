@@ -871,7 +871,17 @@ std::optional<SimpleRange> AccessibilityObject::visibleCharacterRangeInternal(co
 
     // Origin isn't contained in visible rect, start moving forward by line.
     while (!contentRect.contains(elementRect.location())) {
-        auto nextLinePosition = nextLineEndPosition(VisiblePosition(makeContainerOffsetPosition(startBoundary)));
+        auto currentPosition = VisiblePosition(makeContainerOffsetPosition(startBoundary));
+        auto nextLinePosition = nextLineEndPosition(currentPosition);
+        if (nextLinePosition == currentPosition) {
+            // We tried to move to the next line end, but got the same position back. Break to avoid
+            // looping infinitely. It would be better if we understood *why* nextLineEndPosition
+            // is returning the same position, but do this for now. If you hit this assert, please
+            // file a bug with steps to reproduce.
+            ASSERT_NOT_REACHED();
+            break;
+        }
+
         auto testStartBoundary = makeBoundaryPoint(nextLinePosition);
         if (!testStartBoundary || !contains(*range, *testStartBoundary))
             break;
