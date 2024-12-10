@@ -8138,3 +8138,5 @@ imported/w3c/web-platform-tests/WebIDL/ecmascript-binding/global-mutable-prototy
 # Below tests give `Error fetching /interfaces/webidl.idl` in test output
 imported/w3c/web-platform-tests/WebIDL/idlharness.any.html [ Skip ]
 imported/w3c/web-platform-tests/WebIDL/idlharness.any.worker.html [ Skip ]
+
+webkit.org/b/279297 fast/block/float/float-avoider-with-negative-margin.html [ ImageOnlyFailure ]
