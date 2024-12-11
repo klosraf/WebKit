@@ -4092,7 +4092,6 @@ void BBQJIT::emitTailCall(unsigned functionIndex, const TypeDefinition& signatur
         else
             resolvedArguments.append(Value::pinned(arguments[i].type(), locationOf(arguments[i])));
 
-        // This isn't really needed but it's nice to have good book keeping.
         consume(arguments[i]);
     }
 
@@ -4146,6 +4145,13 @@ void BBQJIT::emitTailCall(unsigned functionIndex, const TypeDefinition& signatur
     }
 
     LOG_INSTRUCTION("ReturnCall", functionIndex, arguments);
+
+    // Because we're returning, we need to consume all elements of the
+    // expression stack here so they don't spuriously hold onto their bindings
+    // in the subsequent unreachable code.
+
+    for (const auto& value : m_parser->expressionStack())
+        consume(value);
 }
 
 
@@ -4338,6 +4344,13 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
 
     m_jit.farJump(calleeCode, WasmEntryPtrTag);
     LOG_INSTRUCTION(opcode, callee, arguments);
+
+    // Because we're returning, we need to consume all elements of the
+    // expression stack here so they don't spuriously hold onto their bindings
+    // in the subsequent unreachable code.
+
+    for (const auto& value : m_parser->expressionStack())
+        consume(value);
 }
 
 void BBQJIT::addRTTSlowPathJump(TypeIndex signature, GPRReg calleeRTT)
