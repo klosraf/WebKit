@@ -42,9 +42,8 @@
 #import "WebExtensionUtilities.h"
 #import "_WKWebExtensionLocalization.h"
 #import <CoreFoundation/CFBundle.h>
-#import <UniformTypeIdentifiers/UTCoreTypes.h>
-#import <UniformTypeIdentifiers/UTType.h>
 #import <WebCore/LocalizedStrings.h>
+#import <WebCore/MIMETypeRegistry.h>
 #import <wtf/BlockPtr.h>
 #import <wtf/FileSystem.h>
 #import <wtf/HashSet.h>
@@ -67,6 +66,8 @@ SOFT_LINK_PRIVATE_FRAMEWORK(CoreSVG)
 SOFT_LINK(CoreSVG, CGSVGDocumentCreateFromData, CGSVGDocumentRef, (CFDataRef data, CFDictionaryRef options), (data, options))
 SOFT_LINK(CoreSVG, CGSVGDocumentRelease, void, (CGSVGDocumentRef document), (document))
 #endif
+
+using namespace WebCore;
 
 namespace WebKit {
 
@@ -494,22 +495,17 @@ NSURL *WebExtension::resourceFileURLForPath(NSString *path)
     return resourceURL;
 }
 
-UTType *WebExtension::resourceTypeForPath(NSString *path)
+String WebExtension::resourceMIMETypeForPath(const String& path)
 {
-    UTType *result;
+    auto dataPrefix = "data:"_s;
+    if (path.startsWith(dataPrefix)) {
+        auto mimeTypePosition = path.find(';');
+        if (mimeTypePosition != notFound)
+            return path.substring(dataPrefix.length(), mimeTypePosition - dataPrefix.length());
+        return defaultMIMEType();
+    }
 
-    if ([path hasPrefix:@"data:"]) {
-        auto mimeTypeRange = [path rangeOfString:@";"];
-        if (mimeTypeRange.location != NSNotFound) {
-            auto *mimeType = [path substringWithRange:NSMakeRange(5, mimeTypeRange.location - 5)];
-            result = [UTType typeWithMIMEType:mimeType];
-        }
-    } else if (auto *fileExtension = path.pathExtension; fileExtension.length)
-        result = [UTType typeWithFilenameExtension:fileExtension];
-    else if (auto *fileURL = resourceFileURLForPath(path))
-        [fileURL getResourceValue:&result forKey:NSURLContentTypeKey error:nil];
-
-    return result;
+    return MIMETypeRegistry::mimeTypeForPath(path);
 }
 
 NSString *WebExtension::resourceStringForPath(NSString *path, NSError **outError, CacheResult cacheResult, SuppressNotFoundErrors suppressErrors)
@@ -1289,8 +1285,8 @@ CocoaImage *WebExtension::imageForPath(NSString *imagePath, NSError **outError, 
     CocoaImage *result;
 
 #if !USE(NSIMAGE_FOR_SVG_SUPPORT)
-    UTType *imageType = resourceTypeForPath(imagePath);
-    if ([imageType.identifier isEqualToString:UTTypeSVG.identifier]) {
+    auto imageType = resourceMIMETypeForPath(imagePath);
+    if (equalLettersIgnoringASCIICase(imageType, "image/svg+xml"_s)) {
 #if USE(APPKIT)
         static Class svgImageRep = NSClassFromString(@"_NSSVGImageRep");
         RELEASE_ASSERT(svgImageRep);

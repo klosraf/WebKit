@@ -35,6 +35,7 @@
 #import "APIArray.h"
 #import "APIContentRuleList.h"
 #import "APIContentRuleListStore.h"
+#import "APIData.h"
 #import "APIPageConfiguration.h"
 #import "CocoaHelpers.h"
 #import "ContextMenuContextData.h"
@@ -81,6 +82,7 @@
 #import "_WKWebExtensionStorageSQLiteStore.h"
 #import <UniformTypeIdentifiers/UTType.h>
 #import <WebCore/LocalizedStrings.h>
+#import <WebCore/TextResourceDecoder.h>
 #import <WebCore/UserScript.h>
 #import <pal/spi/cocoa/NSKeyedUnarchiverSPI.h>
 #import <wtf/BlockPtr.h>
@@ -612,6 +614,33 @@ _WKWebExtensionLocalization *WebExtensionContext::localization()
     if (!m_localization)
         m_localization = [[_WKWebExtensionLocalization alloc] initWithLocalizedDictionary:extension().localization().localizationDictionary uniqueIdentifier:baseURL().host().toString()];
     return m_localization.get();
+}
+
+RefPtr<API::Data> WebExtensionContext::localizedResourceData(const RefPtr<API::Data>& resourceData, const String& mimeType)
+{
+    if (!equalLettersIgnoringASCIICase(mimeType, "text/css"_s) || !resourceData)
+        return resourceData;
+
+    RefPtr decoder = WebCore::TextResourceDecoder::create(mimeType, { }, true);
+    auto stylesheetContents = decoder->decode(resourceData->span());
+
+    auto localizedString = localizedResourceString(stylesheetContents, mimeType);
+    if (localizedString == stylesheetContents)
+        return resourceData;
+
+    return API::Data::create(localizedString.utf8().span());
+}
+
+String WebExtensionContext::localizedResourceString(const String& resourceContents, const String& mimeType)
+{
+    if (!equalLettersIgnoringASCIICase(mimeType, "text/css"_s) || resourceContents.isEmpty() || !resourceContents.contains("__MSG_"_s))
+        return resourceContents;
+
+    auto* localization = this->localization();
+    if (!localization)
+        return resourceContents;
+
+    return [localization localizedStringForString:resourceContents];
 }
 
 void WebExtensionContext::setInspectable(bool inspectable)
@@ -4344,6 +4373,8 @@ void WebExtensionContext::addInjectedContent(const InjectedContentVector& inject
                 recordError(error);
                 continue;
             }
+
+            styleSheetString = localizedResourceString(styleSheetString, "text/css"_s);
 
             auto userStyleSheet = API::UserStyleSheet::create(WebCore::UserStyleSheet { styleSheetString, URL { m_baseURL, styleSheetPath }, makeVector<String>(includeMatchPatterns), makeVector<String>(excludeMatchPatterns), injectedFrames, styleLevel, std::nullopt }, executionWorld);
             originInjectedStyleSheets.append(userStyleSheet);
