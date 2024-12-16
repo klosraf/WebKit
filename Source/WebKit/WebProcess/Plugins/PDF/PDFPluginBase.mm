@@ -1244,9 +1244,14 @@ void PDFPluginBase::incrementalLoaderLog(const String& message)
 
 void PDFPluginBase::incrementalLoaderLogWithBytes(const String& message, uint64_t streamedBytes)
 {
+#if HAVE(INCREMENTAL_PDF_APIS)
     LOG_WITH_STREAM(IncrementalPDF, stream << message);
     verboseLog(m_incrementalLoader.get(), streamedBytes, m_documentFinishedLoading);
     LOG_WITH_STREAM(IncrementalPDFVerbose, stream << message);
+#else
+    UNUSED_PARAM(message);
+    UNUSED_PARAM(streamedBytes);
+#endif
 }
 
 #endif // !LOG_DISABLED
