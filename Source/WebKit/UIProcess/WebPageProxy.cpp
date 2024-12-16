@@ -9079,6 +9079,26 @@ void WebPageProxy::Internals::setTextFromItemForPopupMenu(WebPopupMenuProxy*, in
     Ref { page }->send(Messages::WebPage::SetTextForActivePopupMenu(index));
 }
 
+void WebPageProxy::startDeferringResizeEvents()
+{
+    Ref { internals().page }->send(Messages::WebPage::StartDeferringResizeEvents());
+}
+
+void WebPageProxy::flushDeferredResizeEvents()
+{
+    Ref { internals().page }->send(Messages::WebPage::FlushDeferredResizeEvents());
+}
+
+void WebPageProxy::startDeferringScrollEvents()
+{
+    Ref { internals().page }->send(Messages::WebPage::StartDeferringScrollEvents());
+}
+
+void WebPageProxy::flushDeferredScrollEvents()
+{
+    Ref { internals().page }->send(Messages::WebPage::FlushDeferredScrollEvents());
+}
+
 bool WebPageProxy::isProcessingKeyboardEvents() const
 {
     return !internals().keyEventQueue.isEmpty();
