@@ -7458,3 +7458,5 @@ imported/w3c/web-platform-tests/css/css-view-transitions/new-content-intrinsic-a
 
 # off by 1 pixel (rounding)
 imported/w3c/web-platform-tests/css/css-inline/text-box-trim/text-box-on-non-root-inline-box.html [ Failure ]
+
+webkit.org/b/284761 imported/w3c/web-platform-tests/screen-orientation/orientation-reading.html [ Skip ]
