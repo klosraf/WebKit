@@ -1875,6 +1875,7 @@ private:
     void setFocusedFrameBeforeSelectingTextAtLocation(const WebCore::IntPoint&);
     void setSelectedRangeDispatchingSyntheticMouseEventsIfNeeded(const WebCore::SimpleRange&, WebCore::Affinity);
     void dispatchSyntheticMouseEventsForSelectionGesture(SelectionTouch, const WebCore::IntPoint&);
+    void resetLastSelectedReplacementRangeIfNeeded();
 
     void sendPositionInformation(InteractionInformationAtPosition&&);
     RefPtr<WebCore::ShareableBitmap> shareableBitmapSnapshotForNode(WebCore::Element&);
@@ -2713,6 +2714,7 @@ private:
     WebCore::FloatSize m_overrideAvailableScreenSize;
 
     std::optional<WebCore::SimpleRange> m_initialSelection;
+    std::optional<WebCore::WeakSimpleRange> m_lastSelectedReplacementRange;
     WebCore::VisibleSelection m_storedSelectionForAccessibility { WebCore::VisibleSelection() };
     WebCore::IntDegrees m_deviceOrientation { 0 };
     bool m_keyboardIsAttached { false };

@@ -7194,6 +7194,8 @@ void WebPage::didChangeSelection(LocalFrame& frame)
 #endif
 
 #if PLATFORM(IOS_FAMILY)
+    resetLastSelectedReplacementRangeIfNeeded();
+
     if (!std::exchange(m_sendAutocorrectionContextAfterFocusingElement, false))
         return;
 
@@ -7718,6 +7720,7 @@ void WebPage::didCommitLoad(WebFrame* frame)
     m_estimatedLatency = Seconds(1.0 / 60);
     m_shouldRevealCurrentSelectionAfterInsertion = true;
     m_lastLayerTreeTransactionIdAndPageScaleBeforeScalingPage = std::nullopt;
+    m_lastSelectedReplacementRange = { };
 
 #if ENABLE(IOS_TOUCH_EVENTS)
     auto queuedEvents = makeUniqueRef<EventDispatcher::TouchEventQueue>();
