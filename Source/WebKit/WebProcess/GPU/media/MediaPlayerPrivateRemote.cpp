@@ -1218,10 +1218,10 @@ void MediaPlayerPrivateRemote::paintCurrentFrameInContext(GraphicsContext& conte
     if (context.paintingDisabled())
         return;
 
-    RefPtr videoFrame = videoFrameForCurrentTime();
-    if (!videoFrame)
+    auto nativeImage = nativeImageForCurrentTime();
+    if (!nativeImage)
         return;
-    context.drawVideoFrame(*videoFrame, rect, ImageOrientation::Orientation::None, false);
+    context.drawNativeImage(*nativeImage, rect, FloatRect { { }, nativeImage->size() });
 }
 
 #if !USE(AVFOUNDATION)
@@ -1247,11 +1247,6 @@ RefPtr<WebCore::VideoFrame> MediaPlayerPrivateRemote::videoFrameForCurrentTime()
 {
     if (readyState() < MediaPlayer::ReadyState::HaveCurrentData)
         return { };
-
-#if PLATFORM(COCOA)
-    if (m_videoFrameGatheredWithVideoFrameMetadata)
-        return m_videoFrameGatheredWithVideoFrameMetadata;
-#endif
 
     auto sendResult = connection().sendSync(Messages::RemoteMediaPlayerProxy::VideoFrameForCurrentTimeIfChanged(), m_id);
     if (!sendResult.succeeded())

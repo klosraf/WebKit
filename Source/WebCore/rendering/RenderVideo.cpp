@@ -260,7 +260,7 @@ void RenderVideo::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
         && !paintInfo.paintBehavior.contains(PaintBehavior::Snapshotting))
         return;
 
-    videoElement().paint(context, rect);
+    context.paintFrameForMedia(*mediaPlayer, rect);
 }
 
 void RenderVideo::layout()
