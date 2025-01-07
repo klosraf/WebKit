@@ -44,12 +44,14 @@
 #import <CoreFoundation/CFBundle.h>
 #import <WebCore/LocalizedStrings.h>
 #import <WebCore/MIMETypeRegistry.h>
+#import <WebCore/TextResourceDecoder.h>
 #import <wtf/BlockPtr.h>
 #import <wtf/FileSystem.h>
 #import <wtf/HashSet.h>
 #import <wtf/Language.h>
 #import <wtf/NeverDestroyed.h>
 #import <wtf/cf/TypeCastsCF.h>
+#import <wtf/cocoa/SpanCocoa.h>
 #import <wtf/cocoa/VectorCocoa.h>
 #import <wtf/text/WTFString.h>
 
@@ -530,8 +532,8 @@ NSString *WebExtension::resourceStringForPath(NSString *path, NSError **outError
     if (!data)
         return nil;
 
-    NSString *string;
-    [NSString stringEncodingForData:data encodingOptions:nil convertedString:&string usedLossyConversion:nil];
+    RefPtr decoder = WebCore::TextResourceDecoder::create(resourceMIMETypeForPath(path), { }, true);
+    auto string = decoder->decode(span(data));
     if (!string)
         return nil;
 

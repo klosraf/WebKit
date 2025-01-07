@@ -83,7 +83,7 @@ Vector<RetainPtr<_WKFrameTreeNode>> getFrames(_WKFrameTreeNode *currentNode, std
 std::optional<SourcePair> sourcePairForResource(const String& path, WebExtensionContext& extensionContext)
 {
     NSError *error;
-    String scriptString = extensionContext.extension().resourceStringForPath(path, &error);
+    String scriptString = extensionContext.extension().resourceStringForPath(path, &error, WebExtension::CacheResult::Yes);
     if (!scriptString || error) {
         extensionContext.recordError(error);
         return std::nullopt;
