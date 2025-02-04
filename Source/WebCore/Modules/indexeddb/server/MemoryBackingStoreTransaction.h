@@ -94,7 +94,7 @@ private:
 
     HashMap<MemoryObjectStore*, uint64_t> m_originalKeyGenerators;
     HashMap<String, RefPtr<MemoryObjectStore>> m_deletedObjectStores;
-    HashMap<String, RefPtr<MemoryIndex>> m_deletedIndexes;
+    HashSet<RefPtr<MemoryIndex>> m_deletedIndexes;
     HashMap<MemoryObjectStore*, std::unique_ptr<KeyValueMap>> m_originalValues;
     HashMap<MemoryObjectStore*, std::unique_ptr<KeyValueMap>> m_clearedKeyValueMaps;
     HashMap<MemoryObjectStore*, std::unique_ptr<IDBKeyDataSet>> m_clearedOrderedKeys;
