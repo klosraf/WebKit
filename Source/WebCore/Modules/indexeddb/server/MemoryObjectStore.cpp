@@ -105,8 +105,10 @@ IDBError MemoryObjectStore::createIndex(MemoryBackingStoreTransaction& transacti
         return IDBError(ExceptionCode::ConstraintError);
 
     ASSERT(!m_indexesByIdentifier.contains(info.identifier()));
-    auto index = MemoryIndex::create(info, *this);
+    if (m_indexesByIdentifier.contains(info.identifier()))
+        return IDBError { ExceptionCode::UnknownError, "Index with identifier already exists"_s };
 
+    auto index = MemoryIndex::create(info, *this);
     // If there was an error populating the new index, then the current records in the object store violate its contraints
     auto error = populateIndexWithExistingRecords(index.get());
     if (!error.isNull())
