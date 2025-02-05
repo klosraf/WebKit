@@ -1835,6 +1835,11 @@ public:
 
             MATCH_NEXT();
         }
+
+        case ByteTerm::Type::PatternCasedCharacterNonGreedy:
+            // Case insensitive matching of unicode characters is handled as Type::CharacterClass.
+            ASSERT(!isEitherUnicodeCompilation() || U_IS_BMP(currentTerm().atom.patternCharacter));
+            FALLTHROUGH;
         case ByteTerm::Type::PatternCharacterNonGreedy: {
             DUMP_CURR_CHAR();
             BackTrackInfoPatternCharacter* backTrack = reinterpret_cast<BackTrackInfoPatternCharacter*>(context->frame + currentTerm().frameLocation);
@@ -1921,16 +1926,6 @@ public:
 
                 MATCH_NEXT();
             }
-        }
-        case ByteTerm::Type::PatternCasedCharacterNonGreedy: {
-            DUMP_CURR_CHAR();
-            BackTrackInfoPatternCharacter* backTrack = reinterpret_cast<BackTrackInfoPatternCharacter*>(context->frame + currentTerm().frameLocation);
-
-            // Case insensitive matching of unicode characters is handled as Type::CharacterClass.
-            ASSERT(!isEitherUnicodeCompilation() || U_IS_BMP(currentTerm().atom.patternCharacter));
-            
-            backTrack->matchAmount = 0;
-            MATCH_NEXT();
         }
 
         case ByteTerm::Type::CharacterClass:
