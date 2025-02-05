@@ -1891,3 +1891,8 @@
     || (PLATFORM(COCOA) && !PLATFORM(MAC))
 #define HAVE_X25519_ZERO_CHECKS 1
 #endif
+
+#if !defined(HAVE_DENORMAL) \
+    && (CPU(X86_SSE2) || CPU(ARM) || CPU(ARM64))
+#define HAVE_DENORMAL 1
+#endif
