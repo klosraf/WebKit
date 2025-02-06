@@ -280,8 +280,8 @@ void MediaPlayerPrivateAVFoundation::seekToTarget(const SeekTarget& target)
     if (target.time > duration())
         adjustedTarget.time = duration();
 
-    if (currentTextTrack())
-        currentTextTrack()->beginSeeking();
+    if (RefPtr track = currentTextTrack().get())
+        track->beginSeeking();
 
     ALWAYS_LOG(LOGIDENTIFIER, "seeking to ", adjustedTarget.time);
 
@@ -675,8 +675,8 @@ void MediaPlayerPrivateAVFoundation::seekCompleted(bool finished)
     if (!finished)
         return;
 
-    if (currentTextTrack())
-        currentTextTrack()->endSeeking();
+    if (RefPtr track = currentTextTrack().get())
+        track->endSeeking();
 
     updateStates();
 

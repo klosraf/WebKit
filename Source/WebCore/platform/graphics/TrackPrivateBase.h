@@ -35,7 +35,7 @@
 #include <wtf/LoggerHelper.h>
 #include <wtf/MediaTime.h>
 #include <wtf/TZoneMalloc.h>
-#include <wtf/ThreadSafeRefCounted.h>
+#include <wtf/ThreadSafeWeakPtr.h>
 #include <wtf/Vector.h>
 #include <wtf/text/AtomString.h>
 
@@ -44,7 +44,7 @@ namespace WebCore {
 using TrackID = uint64_t;
 
 class WEBCORE_EXPORT TrackPrivateBase
-    : public ThreadSafeRefCounted<TrackPrivateBase>
+    : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<TrackPrivateBase>
 #if !RELEASE_LOG_DISABLED
     , public LoggerHelper
 #endif

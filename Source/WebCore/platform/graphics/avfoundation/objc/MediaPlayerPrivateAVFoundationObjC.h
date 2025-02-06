@@ -299,7 +299,7 @@ private:
 #endif
 
     void setCurrentTextTrack(InbandTextTrackPrivateAVF*) final;
-    InbandTextTrackPrivateAVF* currentTextTrack() const final { return m_currentTextTrack; }
+    ThreadSafeWeakPtr<InbandTextTrackPrivateAVF> currentTextTrack() const final { return m_currentTextTrack; }
 
     void updateAudioTracks();
     void updateVideoTracks();
@@ -429,8 +429,7 @@ private:
     Vector<RefPtr<VideoTrackPrivateAVFObjC>> m_videoTracks;
     RefPtr<MediaSelectionGroupAVFObjC> m_audibleGroup;
     RefPtr<MediaSelectionGroupAVFObjC> m_visualGroup;
-
-    InbandTextTrackPrivateAVF* m_currentTextTrack { nullptr };
+    ThreadSafeWeakPtr<InbandTextTrackPrivateAVF> m_currentTextTrack;
 
 #if ENABLE(DATACUE_VALUE)
     RefPtr<InbandMetadataTextTrackPrivateAVF> m_metadataTrack;

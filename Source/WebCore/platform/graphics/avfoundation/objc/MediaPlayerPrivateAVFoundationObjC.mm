@@ -3157,34 +3157,34 @@ void MediaPlayerPrivateAVFoundationObjC::processCue(NSArray *attributedStrings, 
 {
     ASSERT(time >= MediaTime::zeroTime());
 
-    if (!m_currentTextTrack) {
+    RefPtr track = currentTextTrack().get();
+    if (!track) {
         ALWAYS_LOG(LOGIDENTIFIER, "no current text track");
         return;
     }
 
-    m_currentTextTrack->processCue((__bridge CFArrayRef)attributedStrings, (__bridge CFArrayRef)nativeSamples, time);
+    track->processCue((__bridge CFArrayRef)attributedStrings, (__bridge CFArrayRef)nativeSamples, time);
 }
 
 void MediaPlayerPrivateAVFoundationObjC::flushCues()
 {
     INFO_LOG(LOGIDENTIFIER);
 
-    if (!m_currentTextTrack)
-        return;
-
-    m_currentTextTrack->resetCueValues();
+    if (RefPtr track = currentTextTrack().get())
+        track->resetCueValues();
 }
 
 void MediaPlayerPrivateAVFoundationObjC::setCurrentTextTrack(InbandTextTrackPrivateAVF *track)
 {
-    if (m_currentTextTrack == track)
+    if (m_currentTextTrack.get() == track)
         return;
 
     ALWAYS_LOG(LOGIDENTIFIER, "selecting track with language ", track ? track->language() : emptyAtom());
 
-    m_currentTextTrack = track;
-
     if (track) {
+
+        m_currentTextTrack = *track;
+
         if (track->textTrackCategory() == InbandTextTrackPrivateAVF::LegacyClosedCaption)
 ALLOW_DEPRECATED_DECLARATIONS_BEGIN
             [m_avPlayer setClosedCaptionDisplayEnabled:YES];
@@ -3205,6 +3205,8 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
         return;
     }
+
+    m_currentTextTrack = { };
 
     @try {
         [m_avPlayerItem selectMediaOption:0 inMediaSelectionGroup:safeMediaSelectionGroupForLegibleMedia()];
