@@ -820,6 +820,7 @@ TEST(AdvancedPrivacyProtections, DoNotBlockThirdPartyPartitionedCookiesFromSameS
     EXPECT_WK_STREQ(@"test=value", result);
 }
 
+#if HAVE(ALLOW_ONLY_PARTITIONED_COOKIES)
 TEST(AdvancedPrivacyProtections, DoNotBlockThirdPartyPartitionedCookies)
 {
     auto webView = setUpWebViewForTestingTrackerDomainBlocking("<!DOCTYPE html>"
@@ -864,6 +865,7 @@ TEST(AdvancedPrivacyProtections, DoNotBlockThirdPartyPartitionedCookies)
     EXPECT_NE(0U, result.length);
     EXPECT_WK_STREQ(@"test=value", result);
 }
+#endif
 
 TEST(AdvancedPrivacyProtections, LinkPreconnectUsesEnhancedPrivacy)
 {
