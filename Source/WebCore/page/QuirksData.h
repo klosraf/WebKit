@@ -100,6 +100,7 @@ struct WEBCORE_EXPORT QuirksData {
     bool shouldEnableApplicationCacheQuirk { false };
     bool shouldIgnoreAriaForFastPathContentObservationCheckQuirk { false };
     bool shouldNavigatorPluginsBeEmpty { false };
+    bool shouldSilenceWindowResizeEventsDuringApplicationSnapshotting { false };
     bool shouldSuppressAutocorrectionAndAutocapitalizationInHiddenEditableAreasQuirk { false };
     bool shouldSynthesizeTouchEventsAfterNonSyntheticClickQuirk { false };
     bool shouldTreatAddingMouseOutEventListenerAsContentChange { false };
@@ -113,7 +114,6 @@ struct WEBCORE_EXPORT QuirksData {
     bool allowLayeredFullscreenVideos { false };
     bool shouldSilenceMediaQueryListChangeEvents { false };
     bool shouldSilenceResizeObservers { false };
-    bool shouldSilenceWindowResizeEvents { false };
 #endif
 
 #if PLATFORM(VISION)
