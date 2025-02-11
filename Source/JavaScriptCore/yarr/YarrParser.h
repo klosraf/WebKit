@@ -1714,6 +1714,11 @@ private:
 
             if (hasError(m_errorCode))
                 return;
+
+            if (m_delegate.abortedDueToError()) {
+                m_errorCode = m_delegate.abortErrorCode();
+                return;
+            }
         }
 
         if (!m_parenthesesStack.isEmpty())
@@ -2141,6 +2146,9 @@ private:
  *    void quantifyAtom(unsigned min, unsigned max, bool greedy);
  *
  *    void disjunction(CreateDisjunctionPurpose purpose);
+ *
+ *    bool abortedDueToError() const;
+ *    ErrorCode abortErrorCode() const;
  *
  *    void resetForReparsing();
  *
