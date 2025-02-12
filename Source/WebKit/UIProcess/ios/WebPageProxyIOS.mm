@@ -1553,6 +1553,8 @@ WebContentMode WebPageProxy::effectiveContentModeAfterAdjustingPolicies(API::Web
         policies.setOverrideTouchEventDOMAttributesEnabled(false);
 #endif
 
+    policies.setInlineMediaPlaybackPolicy(WebsiteInlineMediaPlaybackPolicy::DoesNotRequirePlaysInlineAttribute);
+
     return WebContentMode::Desktop;
 }
 
