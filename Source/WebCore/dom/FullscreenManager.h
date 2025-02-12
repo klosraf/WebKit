@@ -95,6 +95,8 @@ public:
     void clear();
     void emptyEventQueue();
 
+    void updatePageFullscreenStatusIfTopDocument();
+
 protected:
     friend class Document;
 
@@ -113,8 +115,6 @@ private:
 
     Document* mainFrameDocument();
     RefPtr<Document> protectedMainFrameDocument();
-
-    void updatePageFullscreenStatusIfTopDocument();
 
     WeakRef<Document, WeakPtrImplWithEventTargetData> m_document;
     WeakPtr<Document, WeakPtrImplWithEventTargetData> m_topDocument;

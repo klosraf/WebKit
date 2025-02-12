@@ -336,6 +336,8 @@ static void clearFullscreenFlags(Element& element)
     element.setFullscreenFlag(false);
     if (auto* iframe = dynamicDowncast<HTMLIFrameElement>(element))
         iframe->setIFrameFullscreenFlag(false);
+
+    element.document().fullscreenManager().updatePageFullscreenStatusIfTopDocument();
 }
 
 void FullscreenManager::exitFullscreen(RefPtr<DeferredPromise>&& promise)
@@ -362,7 +364,6 @@ void FullscreenManager::exitFullscreen(RefPtr<DeferredPromise>&& promise)
         addDocumentToFullscreenChangeEventQueue(exitingDocument);
         clearFullscreenFlags(*element);
         element->removeFromTopLayer();
-        updatePageFullscreenStatusIfTopDocument();
     }
 
     m_pendingExitFullscreen = true;
@@ -461,8 +462,6 @@ void FullscreenManager::finishExitFullscreen(Document& currentDocument, ExitMode
         addDocumentToFullscreenChangeEventQueue(descendantDocument);
         unfullscreenDocument(descendantDocument);
     }
-
-    updatePageFullscreenStatusIfTopDocument();
 }
 
 bool FullscreenManager::isFullscreenEnabled() const
@@ -544,13 +543,13 @@ bool FullscreenManager::willEnterFullscreen(Element& element, HTMLMediaElementEn
             ancestor->removeFromTopLayer();
         ancestor->addToTopLayer();
 
+        ancestor->document().fullscreenManager().updatePageFullscreenStatusIfTopDocument();
+
         RenderElement::markRendererDirtyAfterTopLayerChange(ancestor->checkedRenderer().get(), containingBlockBeforeStyleResolution.get());
     }
 
     for (auto ancestor : ancestorsInTreeOrder)
         addDocumentToFullscreenChangeEventQueue(ancestor->document());
-
-    updatePageFullscreenStatusIfTopDocument();
 
     if (auto* iframe = dynamicDowncast<HTMLIFrameElement>(element))
         iframe->setIFrameFullscreenFlag(true);
