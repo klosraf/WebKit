@@ -4044,7 +4044,7 @@ void WebPageProxy::sendWheelEvent(WebCore::FrameIdentifier frameID, const WebWhe
         sendWheelEventScrollingAccelerationCurveIfNecessary(event);
         legacyMainFrameProcess->protectedConnection()->send(Messages::EventDispatcher::WheelEvent(webPageIDInMainFrameProcess(), event, rubberBandableEdges), 0, { }, Thread::QOS::UserInteractive);
     } else {
-        sendWithAsyncReplyToProcessContainingFrame(frameID, Messages::WebPage::HandleWheelEvent(frameID, event, processingSteps, willStartSwipe), [weakThis = WeakPtr { *this }, frameID,  wheelEvent = event, processingSteps, rubberBandableEdges, willStartSwipe, wasHandledForScrolling](std::optional<ScrollingNodeID> nodeID, std::optional<WheelScrollGestureState> gestureState, bool handled, std::optional<RemoteUserInputEventData> remoteWheelEventData) mutable {
+        sendWithAsyncReplyToProcessContainingFrame(frameID, Messages::WebPage::HandleWheelEvent(frameID, event, processingSteps, willStartSwipe), [weakThis = WeakPtr { *this }, wheelEvent = event, processingSteps, rubberBandableEdges, willStartSwipe, wasHandledForScrolling](std::optional<ScrollingNodeID> nodeID, std::optional<WheelScrollGestureState> gestureState, bool handled, std::optional<RemoteUserInputEventData> remoteWheelEventData) mutable {
             RefPtr protectedThis = weakThis.get();
             if (!protectedThis)
                 return;
@@ -4058,9 +4058,6 @@ void WebPageProxy::sendWheelEvent(WebCore::FrameIdentifier frameID, const WebWhe
                 return;
             }
 
-            if (RefPtr frame = WebFrameProxy::webFrame(frameID); frame && frame->process().hasConnection())
-                MESSAGE_CHECK(frame->protectedProcess(), protectedThis->wheelEventCoalescer().hasEventsBeingProcessed());
-
             protectedThis->handleWheelEventReply(wheelEvent, nodeID, gestureState, wasHandledForScrolling, handled);
         });
     }
@@ -4073,6 +4070,8 @@ void WebPageProxy::sendWheelEvent(WebCore::FrameIdentifier frameID, const WebWhe
 void WebPageProxy::handleWheelEventReply(const WebWheelEvent& event, std::optional<ScrollingNodeID> nodeID, std::optional<WheelScrollGestureState> gestureState, bool wasHandledForScrolling, bool wasHandledByWebProcess)
 {
     LOG_WITH_STREAM(WheelEvents, stream << "WebPageProxy::handleWheelEventReply " << platform(event) << " - handled for scrolling " << wasHandledForScrolling << " handled by web process " << wasHandledByWebProcess << " nodeID " << nodeID << " gesture state " << gestureState);
+
+    MESSAGE_CHECK(m_legacyMainFrameProcess, wheelEventCoalescer().hasEventsBeingProcessed());
 
 #if ENABLE(ASYNC_SCROLLING) && PLATFORM(MAC)
     if (auto* scrollingCoordinatorProxy = this->scrollingCoordinatorProxy()) {
@@ -4318,7 +4317,13 @@ TrackingType WebPageProxy::touchEventTrackingType(const WebTouchEvent& touchStar
 #if ENABLE(MAC_GESTURE_EVENTS)
 void WebPageProxy::sendGestureEvent(FrameIdentifier frameID, const NativeWebGestureEvent& event)
 {
-    sendToProcessContainingFrame(frameID, Messages::EventDispatcher::GestureEvent(frameID, m_webPageID, event));
+    sendWithAsyncReplyToProcessContainingFrame(frameID, Messages::EventDispatcher::GestureEvent(frameID, m_webPageID, event), [protectedThis = Ref { *this }, event] (std::optional<WebEventType> eventType, bool handled, std::optional<WebCore::RemoteUserInputEventData> remoteUserInputEventData) {
+        if (!protectedThis->m_pageClient)
+            return;
+        if (!eventType)
+            return;
+        protectedThis->didReceiveEvent(*eventType, handled, remoteUserInputEventData);
+    });
 }
 
 void WebPageProxy::handleGestureEvent(const NativeWebGestureEvent& event)
@@ -7285,8 +7290,7 @@ void WebPageProxy::didSameDocumentNavigationForFrame(IPC::Connection& connection
     if (!frame)
         return;
 
-    MESSAGE_CHECK_BASE(frame->process().hasConnection(connection), connection);
-    MESSAGE_CHECK_URL(frame->protectedProcess(), url);
+    MESSAGE_CHECK_URL(m_legacyMainFrameProcess, url);
 
     WEBPAGEPROXY_RELEASE_LOG(Loading, "didSameDocumentNavigationForFrame: frameID=%" PRIu64 ", isMainFrame=%d, type=%u", frameID.object().toUInt64(), frame->isMainFrame(), enumToUnderlyingType(navigationType));
 
@@ -7328,8 +7332,7 @@ void WebPageProxy::didSameDocumentNavigationForFrameViaJS(IPC::Connection& conne
     if (!frame)
         return;
 
-    MESSAGE_CHECK_BASE(frame->process().hasConnection(connection), connection);
-    MESSAGE_CHECK_URL(frame->protectedProcess(), url);
+    MESSAGE_CHECK_URL(m_legacyMainFrameProcess, url);
 
     WEBPAGEPROXY_RELEASE_LOG(Loading, "didSameDocumentNavigationForFrameViaJS: frameID=%" PRIu64 ", isMainFrame=%d, type=%u", frameID->object().toUInt64(), frame->isMainFrame(), enumToUnderlyingType(navigationType));
 
@@ -8010,8 +8013,7 @@ void WebPageProxy::decidePolicyForNewWindowAction(IPC::Connection& connection, N
     if (!frame)
         return;
 
-    MESSAGE_CHECK_BASE(frame->process().hasConnection(connection), connection);
-    MESSAGE_CHECK_URL(frame->protectedProcess(), request.url());
+    MESSAGE_CHECK_URL(m_legacyMainFrameProcess, request.url());
 
     RefPtr<API::FrameInfo> sourceFrameInfo;
     if (frame)
@@ -8243,8 +8245,7 @@ void WebPageProxy::didUpdateHistoryTitle(IPC::Connection& connection, const Stri
         return;
 
     MESSAGE_CHECK_BASE(frame->page() == this, connection);
-    MESSAGE_CHECK_BASE(frame->process().hasConnection(connection), connection);
-    MESSAGE_CHECK_URL(frame->protectedProcess(), url);
+    MESSAGE_CHECK_URL(m_legacyMainFrameProcess, url);
 
     if (frame->isMainFrame())
         m_historyClient->didUpdateHistoryTitle(*this, title, url);
@@ -9076,9 +9077,9 @@ void WebPageProxy::restartXRSessionActivityOnProcessResumeIfNeeded()
 }
 #endif
 
-void WebPageProxy::showColorPicker(IPC::Connection& connection, const WebCore::Color& initialColor, const IntRect& elementRect, ColorControlSupportsAlpha supportsAlpha, Vector<WebCore::Color>&& suggestions)
+void WebPageProxy::showColorPicker(const WebCore::Color& initialColor, const IntRect& elementRect, ColorControlSupportsAlpha supportsAlpha, Vector<WebCore::Color>&& suggestions)
 {
-    MESSAGE_CHECK_BASE(supportsAlpha == ColorControlSupportsAlpha::No || m_preferences->inputTypeColorEnhancementsEnabled(), connection);
+    MESSAGE_CHECK(m_legacyMainFrameProcess, supportsAlpha == ColorControlSupportsAlpha::No || protectedPreferences()->inputTypeColorEnhancementsEnabled());
 
     RefPtr pageClient = this->pageClient();
     if (!pageClient)
@@ -9372,14 +9373,14 @@ void WebPageProxy::setIsNeverRichlyEditableForTouchBar(bool isNeverRichlyEditabl
 
 #endif
 
-void WebPageProxy::requestDOMPasteAccess(IPC::Connection& connection, DOMPasteAccessCategory pasteAccessCategory, FrameIdentifier frameID, const IntRect& elementRect, const String& originIdentifier, CompletionHandler<void(DOMPasteAccessResponse)>&& completionHandler)
+void WebPageProxy::requestDOMPasteAccess(DOMPasteAccessCategory pasteAccessCategory, FrameIdentifier frameID, const IntRect& elementRect, const String& originIdentifier, CompletionHandler<void(DOMPasteAccessResponse)>&& completionHandler)
 {
-    MESSAGE_CHECK_COMPLETION_BASE(!originIdentifier.isEmpty(), connection, completionHandler(DOMPasteAccessResponse::DeniedForGesture));
+    MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, !originIdentifier.isEmpty(), completionHandler(DOMPasteAccessResponse::DeniedForGesture));
 
     auto requiresInteraction = DOMPasteRequiresInteraction::Yes;
     if (auto origin = SecurityOrigin::createFromString(originIdentifier); !origin->isOpaque()) {
         RefPtr frame = WebFrameProxy::webFrame(frameID);
-        MESSAGE_CHECK_COMPLETION_BASE(frame && frame->page() == this, connection, completionHandler(DOMPasteAccessResponse::DeniedForGesture));
+        MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, frame && frame->page() == this, completionHandler(DOMPasteAccessResponse::DeniedForGesture));
 
         for (RefPtr currentFrame = frame; currentFrame; currentFrame = currentFrame->parentFrame()) {
             if (origin->isSameOriginDomain(SecurityOrigin::create(currentFrame->url()))) {
@@ -9493,7 +9494,7 @@ void WebPageProxy::backForwardUpdateItem(IPC::Connection& connection, Ref<FrameS
     frameItem->setFrameState(WTFMove(frameState));
 }
 
-void WebPageProxy::backForwardGoToItem(IPC::Connection& connection, BackForwardItemIdentifier itemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
+void WebPageProxy::backForwardGoToItem(BackForwardItemIdentifier itemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
 {
     // On process swap, we tell the previous process to ignore the load, which causes it so restore its current back forward item to its previous
     // value. Since the load is really going on in a new provisional process, we want to ignore such requests from the committed process.
@@ -9501,7 +9502,7 @@ void WebPageProxy::backForwardGoToItem(IPC::Connection& connection, BackForwardI
     if (m_provisionalPage)
         return completionHandler(protectedBackForwardList()->counts());
 
-    backForwardGoToItemShared(connection, itemID, WTFMove(completionHandler));
+    backForwardGoToItemShared(itemID, WTFMove(completionHandler));
 }
 
 void WebPageProxy::backForwardListContainsItem(WebCore::BackForwardItemIdentifier itemID, CompletionHandler<void(bool)>&& completionHandler)
@@ -9509,9 +9510,9 @@ void WebPageProxy::backForwardListContainsItem(WebCore::BackForwardItemIdentifie
     completionHandler(protectedBackForwardList()->itemForID(itemID));
 }
 
-void WebPageProxy::backForwardGoToItemShared(IPC::Connection& connection, BackForwardItemIdentifier itemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
+void WebPageProxy::backForwardGoToItemShared(BackForwardItemIdentifier itemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
 {
-    MESSAGE_CHECK_COMPLETION_BASE(!WebKit::isInspectorPage(*this), connection, completionHandler(m_backForwardList->counts()));
+    MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, !WebKit::isInspectorPage(Ref { *this }), completionHandler(m_backForwardList->counts()));
 
     Ref backForwardList = m_backForwardList;
     RefPtr item = backForwardList->itemForID(itemID);
@@ -10451,7 +10452,8 @@ void WebPageProxy::keyEventHandlingCompleted(std::optional<WebEventType> eventTy
 {
     MESSAGE_CHECK(m_legacyMainFrameProcess, !internals().keyEventQueue.isEmpty());
     auto event = internals().keyEventQueue.takeFirst();
-    MESSAGE_CHECK(m_legacyMainFrameProcess, !eventType || *eventType == event.type());
+    if (eventType)
+        MESSAGE_CHECK(m_legacyMainFrameProcess, *eventType == event.type());
 
 #if PLATFORM(WIN)
     if (!handled && eventType && *eventType == WebEventType::RawKeyDown)
@@ -11758,19 +11760,19 @@ void WebPageProxy::didApplyLinkDecorationFiltering(const URL& originalURL, const
     m_navigationClient->didApplyLinkDecorationFiltering(*this, originalURL, adjustedURL);
 }
 
-void WebPageProxy::exceededDatabaseQuota(IPC::Connection& connection, FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& reply)
+void WebPageProxy::exceededDatabaseQuota(FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& reply)
 {
-    requestStorageSpace(connection, frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, [reply = WTFMove(reply)](auto quota) mutable {
+    requestStorageSpace(frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, [reply = WTFMove(reply)](auto quota) mutable {
         reply(quota);
     });
 }
 
-void WebPageProxy::requestStorageSpace(IPC::Connection& connection, FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& completionHandler)
+void WebPageProxy::requestStorageSpace(FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& completionHandler)
 {
     WEBPAGEPROXY_RELEASE_LOG(Storage, "requestStorageSpace for frame %" PRIu64 ", current quota %" PRIu64 " current usage %" PRIu64 " expected usage %" PRIu64, frameID.object().toUInt64(), currentQuota, currentDatabaseUsage, expectedUsage);
 
-    StorageRequests::singleton().processOrAppend([this, protectedThis = Ref { *this }, pageURL = currentURL(), &connection, frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, completionHandler = WTFMove(completionHandler)] mutable {
-        this->makeStorageSpaceRequest(connection, frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, [this, protectedThis = WTFMove(protectedThis), frameID, pageURL = WTFMove(pageURL), completionHandler = WTFMove(completionHandler), currentQuota](auto quota) mutable {
+    StorageRequests::singleton().processOrAppend([this, protectedThis = Ref { *this }, pageURL = currentURL(), frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, completionHandler = WTFMove(completionHandler)] mutable {
+        this->makeStorageSpaceRequest(frameID, originIdentifier, databaseName, displayName, currentQuota, currentOriginUsage, currentDatabaseUsage, expectedUsage, [this, protectedThis = WTFMove(protectedThis), frameID, pageURL = WTFMove(pageURL), completionHandler = WTFMove(completionHandler), currentQuota](auto quota) mutable {
 
             WEBPAGEPROXY_RELEASE_LOG(Storage, "requestStorageSpace response for frame %" PRIu64 ", quota %" PRIu64, frameID.object().toUInt64(), quota);
             UNUSED_VARIABLE(frameID);
@@ -11785,7 +11787,7 @@ void WebPageProxy::requestStorageSpace(IPC::Connection& connection, FrameIdentif
     });
 }
 
-void WebPageProxy::makeStorageSpaceRequest(IPC::Connection& connection, FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& completionHandler)
+void WebPageProxy::makeStorageSpaceRequest(FrameIdentifier frameID, const String& originIdentifier, const String& databaseName, const String& displayName, uint64_t currentQuota, uint64_t currentOriginUsage, uint64_t currentDatabaseUsage, uint64_t expectedUsage, CompletionHandler<void(uint64_t)>&& completionHandler)
 {
     if (m_isQuotaIncreaseDenied) {
         completionHandler(currentQuota);
@@ -11793,7 +11795,7 @@ void WebPageProxy::makeStorageSpaceRequest(IPC::Connection& connection, FrameIde
     }
 
     RefPtr frame = WebFrameProxy::webFrame(frameID);
-    MESSAGE_CHECK_COMPLETION_BASE(frame, connection, completionHandler(0));
+    MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, frame, completionHandler(0));
 
     auto originData = SecurityOriginData::fromDatabaseIdentifier(originIdentifier);
     if (originData != SecurityOriginData::fromURLWithoutStrictOpaqueness(URL { currentURL() })) {
@@ -14125,14 +14127,14 @@ void WebPageProxy::invalidateAllAttachments()
     m_attachmentIdentifierToAttachmentMap.clear();
 }
 
-void WebPageProxy::serializedAttachmentDataForIdentifiers(IPC::Connection& connection, const Vector<String>& identifiers, CompletionHandler<void(Vector<WebCore::SerializedAttachmentData>&&)>&& completionHandler)
+void WebPageProxy::serializedAttachmentDataForIdentifiers(const Vector<String>& identifiers, CompletionHandler<void(Vector<WebCore::SerializedAttachmentData>&&)>&& completionHandler)
 {
     Vector<WebCore::SerializedAttachmentData> serializedData;
 
-    MESSAGE_CHECK_COMPLETION_BASE(m_preferences->attachmentElementEnabled(), connection, completionHandler(WTFMove(serializedData)));
+    MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, m_preferences->attachmentElementEnabled(), completionHandler(WTFMove(serializedData)));
 
     for (const auto& identifier : identifiers)
-        MESSAGE_CHECK_COMPLETION_BASE(IdentifierToAttachmentMap::isValidKey(identifier), connection, completionHandler(WTFMove(serializedData)));
+        MESSAGE_CHECK_COMPLETION(m_legacyMainFrameProcess, IdentifierToAttachmentMap::isValidKey(identifier), completionHandler(WTFMove(serializedData)));
 
     for (const auto& identifier : identifiers) {
         RefPtr attachment = attachmentForIdentifier(identifier);
