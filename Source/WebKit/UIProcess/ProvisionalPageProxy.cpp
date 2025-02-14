@@ -652,7 +652,7 @@ void ProvisionalPageProxy::didReceiveMessage(IPC::Connection& connection, IPC::D
         || decoder.messageName() == Messages::WebPageProxy::DidChangeProgress::name()
         || decoder.messageName() == Messages::WebPageProxy::DidFinishProgress::name()
         || decoder.messageName() == Messages::WebPageProxy::SetNetworkRequestsInProgress::name()
-        || decoder.messageName() == Messages::WebPageProxy::WillGoToBackForwardListItem::name()
+        || decoder.messageName() == Messages::WebPageProxy::ShouldGoToBackForwardListItemSync::name()
 #if USE(QUICK_LOOK)
         || decoder.messageName() == Messages::WebPageProxy::DidStartLoadForQuickLookDocumentInMainFrame::name()
         || decoder.messageName() == Messages::WebPageProxy::DidFinishLoadForQuickLookDocumentInMainFrame::name()

@@ -891,7 +891,7 @@ public:
     RefPtr<API::Navigation> goToBackForwardItem(WebBackForwardListItem&);
     void tryRestoreScrollPosition();
     void didChangeBackForwardList(WebBackForwardListItem* addedItem, Vector<Ref<WebBackForwardListItem>>&& removed);
-    void willGoToBackForwardListItem(WebCore::BackForwardItemIdentifier, bool inBackForwardCache);
+    void shouldGoToBackForwardListItemSync(WebCore::BackForwardItemIdentifier, bool inBackForwardCache, CompletionHandler<void(bool)>&&);
 
     bool shouldKeepCurrentBackForwardListItemInList(WebBackForwardListItem&);
 

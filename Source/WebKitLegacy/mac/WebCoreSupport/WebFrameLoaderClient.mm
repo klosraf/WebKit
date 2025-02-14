@@ -1093,7 +1093,7 @@ void WebFrameLoaderClient::updateGlobalHistoryRedirectLinks()
     }
 }
 
-bool WebFrameLoaderClient::shouldGoToHistoryItem(WebCore::HistoryItem& item) const
+bool WebFrameLoaderClient::shouldGoToHistoryItem(WebCore::HistoryItem& item, WebCore::IsSameDocumentNavigation) const
 {
     WebView* view = getWebView(m_webFrame.get());
     return [[view _policyDelegateForwarder] webView:view shouldGoToHistoryItem:kit(&item)];

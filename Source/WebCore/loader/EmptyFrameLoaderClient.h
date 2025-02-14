@@ -158,7 +158,8 @@ private:
 
     void updateGlobalHistory() final;
     void updateGlobalHistoryRedirectLinks() final;
-    bool shouldGoToHistoryItem(HistoryItem&) const final;
+    bool shouldGoToHistoryItem(HistoryItem&, IsSameDocumentNavigation) const final;
+
     void saveViewStateToItem(HistoryItem&) final;
     bool canCachePage() const final;
     void didDisplayInsecureContent() final;

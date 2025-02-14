@@ -975,11 +975,9 @@ void EmptyFrameLoaderClient::transitionToCommittedForNewPage(InitializingIframe)
 {
 }
 
-
 void EmptyFrameLoaderClient::didRestoreFromBackForwardCache()
 {
 }
-
 
 void EmptyFrameLoaderClient::updateGlobalHistory()
 {
@@ -989,7 +987,7 @@ void EmptyFrameLoaderClient::updateGlobalHistoryRedirectLinks()
 {
 }
 
-bool EmptyFrameLoaderClient::shouldGoToHistoryItem(HistoryItem&) const
+bool EmptyFrameLoaderClient::shouldGoToHistoryItem(HistoryItem&, IsSameDocumentNavigation) const
 {
     return false;
 }

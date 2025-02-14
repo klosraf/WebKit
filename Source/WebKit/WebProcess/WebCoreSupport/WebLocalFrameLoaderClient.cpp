@@ -1244,13 +1244,15 @@ void WebLocalFrameLoaderClient::updateGlobalHistoryRedirectLinks()
     }
 }
 
-bool WebLocalFrameLoaderClient::shouldGoToHistoryItem(HistoryItem& item) const
+bool WebLocalFrameLoaderClient::shouldGoToHistoryItem(HistoryItem& item, IsSameDocumentNavigation isSameDocumentNavigation) const
 {
     RefPtr webPage = m_frame->page();
     if (!webPage)
         return false;
-    webPage->send(Messages::WebPageProxy::WillGoToBackForwardListItem(item.itemID(), item.isInBackForwardCache()));
-    return true;
+
+    auto sendSyncResult = webPage->sendSync(Messages::WebPageProxy::ShouldGoToBackForwardListItemSync(item.itemID(), item.isInBackForwardCache()));
+    auto [shouldGo] = sendSyncResult.takeReplyOr(true);
+    return shouldGo;
 }
 
 void WebLocalFrameLoaderClient::didDisplayInsecureContent()

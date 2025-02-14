@@ -148,7 +148,7 @@ private:
 #endif
 
         bool didChangeBackForwardList(WebPageProxy&, WebBackForwardListItem*, const Vector<Ref<WebBackForwardListItem>>&) final;
-        bool willGoToBackForwardListItem(WebPageProxy&, WebBackForwardListItem&, bool inBackForwardCache) final;
+        void shouldGoToBackForwardListItem(WebPageProxy&, WebBackForwardListItem&, bool inBackForwardCache, CompletionHandler<void(bool)>&&) final;
 
 #if ENABLE(CONTENT_EXTENSIONS)
         void contentRuleListNotification(WebPageProxy&, URL&&, WebCore::ContentRuleListResults&&) final;
@@ -274,6 +274,7 @@ private:
 
         bool webViewBackForwardListItemAddedRemoved : 1;
         bool webViewWillGoToBackForwardListItemInBackForwardCache : 1;
+        bool webViewShouldGoToBackForwardListItemInBackForwardCacheCompletionHandler : 1;
 
 #if HAVE(APP_SSO)
         bool webViewDecidePolicyForSOAuthorizationLoadWithCurrentPolicyForExtensionCompletionHandler : 1;
