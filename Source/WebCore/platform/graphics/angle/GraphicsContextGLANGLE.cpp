@@ -1169,11 +1169,7 @@ void GraphicsContextGLANGLE::disable(GCGLenum cap)
 {
     if (!makeContextCurrent())
         return;
-    if (cap == PRIMITIVE_RESTART_FIXED_INDEX) {
-        if (m_isForWebGL2)
-            addError(GCGLErrorCode::InvalidOperation);
-        return;
-    }
+
     GL_Disable(cap);
 }
 
@@ -1207,11 +1203,7 @@ void GraphicsContextGLANGLE::enable(GCGLenum cap)
 {
     if (!makeContextCurrent())
         return;
-    if (cap == PRIMITIVE_RESTART_FIXED_INDEX) {
-        if (!m_isForWebGL2)
-            addError(GCGLErrorCode::InvalidOperation);
-        return;
-    }
+
     GL_Enable(cap);
 }
 
