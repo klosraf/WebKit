@@ -3659,8 +3659,12 @@ id WebViewImpl::accessibilityAttributeValue(NSString *attribute, id parameter)
         id child = nil;
         if (m_warningView)
             child = m_warningView.get();
-        else if (m_remoteAccessibilityChild)
+        else if (m_remoteAccessibilityChild) {
+#if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)
+            m_page->takeAccessibilityActivityWhenInWindow();
+#endif
             child = m_remoteAccessibilityChild.get();
+        }
 
         if (!child)
             return nil;

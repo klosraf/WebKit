@@ -591,6 +591,29 @@ void WebPageProxy::takeMutedCaptureAssertion()
     });
 }
 
+#if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)
+void WebPageProxy::takeAccessibilityActivityWhenInWindow()
+{
+    m_mainFrameProcessActivityState->takeAccessibilityActivityWhenInWindow();
+    protectedBrowsingContextGroup()->forEachRemotePage(*this, [](auto& remotePageProxy) {
+        remotePageProxy.processActivityState().takeAccessibilityActivityWhenInWindow();
+    });
+}
+
+bool WebPageProxy::hasAccessibilityActivityForTesting()
+{
+    if (!m_mainFrameProcessActivityState->hasAccessibilityActivityForTesting())
+        return false;
+
+    bool result = true;
+    protectedBrowsingContextGroup()->forEachRemotePage(*this, [&result](auto& remotePageProxy) {
+        result = result || remotePageProxy.processActivityState().hasAccessibilityActivityForTesting();
+    });
+
+    return result;
+}
+#endif
+
 void WebPageProxy::resetActivityState()
 {
     m_mainFrameProcessActivityState->reset();
@@ -2995,6 +3018,13 @@ void WebPageProxy::viewDidLeaveWindow()
 #if HAVE(SPATIAL_TRACKING_LABEL)
     updateDefaultSpatialTrackingLabel();
 #endif
+
+#if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)
+    m_mainFrameProcessActivityState->viewDidLeaveWindow();
+    protectedBrowsingContextGroup()->forEachRemotePage(*this, [](auto& remotePageProxy) {
+        remotePageProxy.processActivityState().viewDidLeaveWindow();
+    });
+#endif
 }
 
 void WebPageProxy::viewDidEnterWindow()
@@ -3007,6 +3037,13 @@ void WebPageProxy::viewDidEnterWindow()
 
 #if HAVE(SPATIAL_TRACKING_LABEL)
     updateDefaultSpatialTrackingLabel();
+#endif
+
+#if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)
+    m_mainFrameProcessActivityState->viewDidEnterWindow();
+    protectedBrowsingContextGroup()->forEachRemotePage(*this, [](auto& remotePageProxy) {
+        remotePageProxy.processActivityState().viewDidEnterWindow();
+    });
 #endif
 }
 
