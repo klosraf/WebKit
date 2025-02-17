@@ -11653,6 +11653,10 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
     parameters.presentingApplicationAuditToken = presentingApplicationAuditToken();
 #endif
 
+#if PLATFORM(COCOA)
+    parameters.presentingApplicationBundleIdentifier = presentingApplicationBundleIdentifier();
+#endif
+
     return parameters;
 }
 
@@ -15979,7 +15983,7 @@ void WebPageProxy::setPresentingApplicationAuditToken(const audit_token_t& prese
     m_presentingApplicationAuditToken = presentingApplicationAuditToken;
 
     if (hasRunningProcess())
-        send(Messages::WebPage::SetPresentingApplicationAuditToken(presentingApplicationAuditToken));
+        send(Messages::WebPage::SetPresentingApplicationAuditTokenAndBundleIdentifier(presentingApplicationAuditToken, presentingApplicationBundleIdentifier()));
 
     if (RefPtr gpuProcess = GPUProcessProxy::singletonIfCreated())
         gpuProcess->setPresentingApplicationAuditToken(protectedLegacyMainFrameProcess()->coreProcessIdentifier(), m_webPageID, presentingApplicationAuditToken);

@@ -454,6 +454,9 @@ Page::Page(PageConfiguration&& pageConfiguration)
 #if HAVE(AUDIT_TOKEN)
     , m_presentingApplicationAuditToken(WTFMove(pageConfiguration.presentingApplicationAuditToken))
 #endif
+#if PLATFORM(COCOA)
+    , m_presentingApplicationBundleIdentifier(WTFMove(pageConfiguration.presentingApplicationBundleIdentifier))
+#endif
 {
     updateTimerThrottlingState();
 
