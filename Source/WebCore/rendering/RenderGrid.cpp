@@ -39,6 +39,7 @@
 #include "RenderLayoutState.h"
 #include "RenderTreeBuilder.h"
 #include "RenderView.h"
+#include <wtf/Scope.h>
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -312,6 +313,11 @@ void RenderGrid::layoutBlock(bool relayoutChildren, LayoutUnit)
 {
     ASSERT(needsLayout());
 
+    auto postLayoutTasks = WTF::makeScopeExit([&] {
+        m_outOfFlowItemColumn.clear();
+        m_outOfFlowItemRow.clear();
+    });
+
     if (!relayoutChildren && simplifiedLayout())
         return;
 
@@ -435,8 +441,6 @@ void RenderGrid::layoutGrid(bool relayoutChildren)
 
 
         layoutPositionedObjects(relayoutChildren || isDocumentElementRenderer());
-        m_outOfFlowItemColumn.clear();
-        m_outOfFlowItemRow.clear();
         m_trackSizingAlgorithm.reset();
 
         computeOverflow(layoutOverflowLogicalBottom(*this));
@@ -569,8 +573,6 @@ void RenderGrid::layoutMasonry(bool relayoutChildren)
 
 
         layoutPositionedObjects(relayoutChildren || isDocumentElementRenderer());
-        m_outOfFlowItemColumn.clear();
-        m_outOfFlowItemRow.clear();
         m_trackSizingAlgorithm.reset();
 
         computeOverflow(layoutOverflowLogicalBottom(*this));
