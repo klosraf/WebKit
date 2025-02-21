@@ -613,7 +613,7 @@ void Buffer::skippedDrawIndexedValidation(CommandEncoder& commandEncoder, uint32
     CommandEncoder::trackEncoder(commandEncoder, m_skippedValidationCommandEncoders);
     commandEncoder.addOnCommitHandler([weakThis = ThreadSafeWeakPtr { *this }, weakCommandEncoder = WeakPtr { commandEncoder }, firstIndex, indexCount, vertexCount, instanceCount, indexType, firstInstance, primitiveOffset, baseVertex, minInstanceCount](CommandBuffer& commandBuffer) {
         if (!weakThis.get() || !weakCommandEncoder)
-            return;
+            return true;
 
         RefPtr protectedThis = weakThis.get();
         RefPtr protectedCommandEncoder = weakCommandEncoder.get();
@@ -624,6 +624,7 @@ void Buffer::skippedDrawIndexedValidation(CommandEncoder& commandEncoder, uint32
                 protectedThis->m_mustTakeSlowIndexValidationPath = false;
             });
         }
+        return true;
     });
 }
 
@@ -635,7 +636,7 @@ void Buffer::skippedDrawIndirectIndexedValidation(CommandEncoder& commandEncoder
     CommandEncoder::trackEncoder(commandEncoder, m_skippedValidationCommandEncoders);
     commandEncoder.addOnCommitHandler([weakThis = ThreadSafeWeakPtr { *this }, apiIndexBuffer = RefPtr { apiIndexBuffer }, weakCommandEncoder = WeakPtr { commandEncoder }, indexType, indexBufferOffsetInBytes, indirectOffset, minVertexCount, minInstanceCount, primitiveType](CommandBuffer& commandBuffer) {
         if (!weakThis.get() || !weakCommandEncoder)
-            return;
+            return true;
 
         RefPtr protectedThis = weakThis.get();
         RefPtr protectedCommandEncoder = weakCommandEncoder.get();
@@ -646,6 +647,7 @@ void Buffer::skippedDrawIndirectIndexedValidation(CommandEncoder& commandEncoder
                 protectedThis->m_mustTakeSlowIndexValidationPath = false;
             });
         }
+        return true;
     });
 }
 
@@ -654,7 +656,7 @@ void Buffer::skippedDrawIndirectValidation(CommandEncoder& commandEncoder, uint6
     CommandEncoder::trackEncoder(commandEncoder, m_skippedValidationCommandEncoders);
     commandEncoder.addOnCommitHandler([weakThis = ThreadSafeWeakPtr { *this }, weakCommandEncoder = WeakPtr { commandEncoder }, indirectOffset, minVertexCount, minInstanceCount](CommandBuffer& commandBuffer) {
         if (!weakThis.get() || !weakCommandEncoder)
-            return;
+            return true;
 
         RefPtr protectedThis = weakThis.get();
         RefPtr protectedCommandEncoder = weakCommandEncoder.get();
@@ -665,6 +667,7 @@ void Buffer::skippedDrawIndirectValidation(CommandEncoder& commandEncoder, uint6
                 protectedThis->m_mustTakeSlowIndexValidationPath = false;
             });
         }
+        return true;
     });
 }
 
@@ -711,11 +714,12 @@ void Buffer::indirectBufferInvalidated(CommandEncoder& commandEncoder)
 
     commandEncoder.addOnCommitHandler([weakThis = ThreadSafeWeakPtr { *this }, weakCommandEncoder = WeakPtr { commandEncoder }](CommandBuffer&) {
         if (!weakThis.get() || !weakCommandEncoder)
-            return;
+            return true;
 
         RefPtr protectedThis = weakThis.get();
         RefPtr commandEncoder = weakCommandEncoder.get();
         protectedThis->indirectBufferInvalidated(commandEncoder.get());
+        return true;
     });
 }
 
