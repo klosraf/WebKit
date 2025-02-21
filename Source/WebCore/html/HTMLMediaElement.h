@@ -697,6 +697,7 @@ public:
 #endif
 
     void mediaSourceWasDetached();
+    WEBCORE_EXPORT void setFullscreenMode(VideoFullscreenMode);
 
 protected:
     HTMLMediaElement(const QualifiedName&, Document&, bool createdByParser);
@@ -781,7 +782,6 @@ private:
     bool canStartSelection() const override { return false; } 
     bool isInteractiveContent() const override;
 
-    void setFullscreenMode(VideoFullscreenMode);
     void willStopBeingFullscreenElement() override;
 
     // ActiveDOMObject.

@@ -88,6 +88,8 @@ public:
     // PlaybackSessionModelClient
     void externalPlaybackChanged(bool, PlaybackSessionModel::ExternalPlaybackTargetType, const String&) final { }
 
+    void swapFullscreenModesWith(NullVideoPresentationInterface&) { }
+
 private:
     NullVideoPresentationInterface(NullPlaybackSessionInterface& playbackSessionInterface)
         : m_playbackSessionInterface(playbackSessionInterface)

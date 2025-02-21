@@ -243,6 +243,8 @@ public:
 
     bool needsFacebookStoriesCreationFormQuirk(const Element&, const RenderStyle&) const;
 
+    WEBCORE_EXPORT bool needsNowPlayingFullscreenSwapQuirk() const;
+
 private:
     bool needsQuirks() const;
     bool isDomain(const String&) const;

@@ -1815,6 +1815,11 @@ bool Quirks::needsFacebookStoriesCreationFormQuirk(const Element& element, const
 #endif
 }
 
+bool Quirks::needsNowPlayingFullscreenSwapQuirk() const
+{
+    return needsQuirks() && m_quirksData.needsNowPlayingFullscreenSwapQuirk;
+}
+
 URL Quirks::topDocumentURL() const
 {
     if (UNLIKELY(!m_topDocumentURLForTesting.isEmpty()))
@@ -2426,6 +2431,10 @@ static void handleNetflixQuirks(QuirksData& quirksData, const URL& quirksURL, co
     quirksData.isNetflix = true;
     // netflix.com https://bugs.webkit.org/show_bug.cgi?id=173030
     quirksData.needsSeekingSupportDisabledQuirk = true;
+
+#if PLATFORM(VISION)
+    quirksData.needsNowPlayingFullscreenSwapQuirk = true;
+#endif
 }
 
 static void handlePandoraQuirks(QuirksData& quirksData, const URL& quirksURL, const String& quirksDomainString, const URL& documentURL)
