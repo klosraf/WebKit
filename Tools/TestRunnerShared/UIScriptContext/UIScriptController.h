@@ -118,6 +118,8 @@ public:
     virtual void endInteractiveObscuredInsetsChange() { notImplemented(); }
     virtual void setObscuredInsets(double, double, double, double) { notImplemented(); }
 
+    virtual void cookiesForDomain(JSStringRef, JSValueRef) { notImplemented(); }
+
     // View Parenting and Visibility
 
     virtual void becomeFirstResponder() { notImplemented(); }

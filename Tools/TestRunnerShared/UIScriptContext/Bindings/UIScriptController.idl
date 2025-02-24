@@ -397,6 +397,8 @@ interface UIScriptController {
 
     undefined setWebViewEditable(boolean editable);
 
+    undefined cookiesForDomain(DOMString domain, object callback);
+
     // Only affects macOS.
     undefined setWebViewAllowsMagnification(boolean allowsMagnification);
 

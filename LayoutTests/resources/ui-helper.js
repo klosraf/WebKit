@@ -2195,6 +2195,22 @@ window.UIHelper = class UIHelper {
         });
     }
 
+    static async cookiesForDomain(domain)
+    {
+        if (!this.isWebKit2())
+            return Promise.resolve([ ]);
+
+        const script = `uiController.cookiesForDomain("${domain}", cookieData => {
+            uiController.uiScriptComplete(JSON.stringify(cookieData));
+        });`;
+
+        return new Promise(resolve => {
+            testRunner.runUIScript(script, cookieData => {
+                resolve(JSON.parse(cookieData));
+            });
+        });
+    }
+
     static addChromeInputField()
     {
         return new Promise(resolve => testRunner.addChromeInputField(resolve));
