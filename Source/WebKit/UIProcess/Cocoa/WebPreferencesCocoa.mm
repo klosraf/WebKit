@@ -47,14 +47,11 @@ bool WebPreferences::platformGetStringUserValueForKey(const String& key, String&
     if (!m_identifier)
         return false;
 
-    id object = [[NSUserDefaults standardUserDefaults] objectForKey:makeKey(m_identifier, m_keyPrefix, key)];
-    if (!object)
-        return false;
-    auto *str = dynamic_objc_cast<NSString>(object);
-    if (!str)
+    NSString *string = [[NSUserDefaults standardUserDefaults] stringForKey:makeKey(m_identifier, m_keyPrefix, key)];
+    if (!string)
         return false;
 
-    userValue = str;
+    userValue = string;
     return true;
 }
 

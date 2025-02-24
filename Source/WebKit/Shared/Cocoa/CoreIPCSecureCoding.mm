@@ -47,19 +47,16 @@ static std::unique_ptr<HashSet<String>>& internalClassNamesExemptFromSecureCodin
         if (isInAuxiliaryProcess())
             return;
 
-        id object = [[NSUserDefaults standardUserDefaults] objectForKey:@"WebKitCrashOnSecureCodingWithExemptClassesKey"];
-        if (!object)
+        NSArray *array = [[NSUserDefaults standardUserDefaults] arrayForKey:@"WebKitCrashOnSecureCodingWithExemptClassesKey"];
+        if (!array)
             return;
 
         exemptClassNames.get() = WTF::makeUnique<HashSet<String>>();
 
-        if (![object isKindOfClass:NSArray.class])
-            return;
-
-        for (id value in (NSArray *)object) {
+        for (id value in array) {
             if (![value isKindOfClass:[NSString class]])
                 continue;
-            exemptClassNames.get()->add((NSString *)object);
+            exemptClassNames.get()->add((NSString *)value);
         }
     });
 
