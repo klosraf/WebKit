@@ -6114,9 +6114,4 @@ bool RenderBox::hasAutoHeightOrContainingBlockWithAutoHeight(UpdatePercentageHei
     return !containingBlock->hasDefiniteLogicalHeight();
 }
 
-bool RenderBox::overflowChangesMayAffectLayout() const
-{
-    return !canUseOverlayScrollbars() && (style().overflowY() == Overflow::Auto || style().overflowX() == Overflow::Auto);
-}
-
 } // namespace WebCore
