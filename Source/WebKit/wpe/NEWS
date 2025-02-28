@@ -1,3 +1,15 @@
+==================
+WPE WebKit 2.47.90
+==================
+
+What's new in WPE WebKit 2.47.90?
+
+  - Ensure that the WebKitCookieManager APIs keep the cookie cache updated.
+  - Use two GPU rendering threads if the system has more than four CPU cores.
+  - Fix web view contents not rendered in some cases.
+  - Fix invalid DPI-aware font size conversion.
+  - Reduce memory copies when rendering DMA-BUF video frames.
+
 =================
 WPE WebKit 2.47.4
 =================
