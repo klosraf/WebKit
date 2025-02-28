@@ -7115,6 +7115,11 @@ void WebPageProxy::didCommitLoadForFrame(IPC::Connection& connection, FrameIdent
     if (frame->isMainFrame() && preferences->textExtractionEnabled())
         prepareTextExtractionSupportIfNeeded();
 #endif
+
+    if (isBackForwardLoadType(frameLoadType)) {
+        if (RefPtr provisionalItem = m_backForwardList->provisionalItem(); provisionalItem && provisionalItem->navigatedFrameID() == frameID)
+            m_backForwardList->commitProvisionalItem();
+    }
 }
 
 void WebPageProxy::didFinishDocumentLoadForFrame(IPC::Connection& connection, FrameIdentifier frameID, std::optional<WebCore::NavigationIdentifier> navigationID, const UserData& userData, WallTime timestamp)
@@ -9584,12 +9589,6 @@ void WebPageProxy::backForwardClearProvisionalItem(IPC::Connection& connection, 
     if (RefPtr frameItem = WebBackForwardListFrameItem::itemForID(itemID, frameItemID))
         protectedBackForwardList()->clearProvisionalItem(*frameItem);
     completionHandler(m_backForwardList->counts());
-}
-
-void WebPageProxy::backForwardCommitProvisionalItem(IPC::Connection& connection, BackForwardItemIdentifier itemID, BackForwardFrameItemIdentifier frameItemID)
-{
-    if (RefPtr frameItem = WebBackForwardListFrameItem::itemForID(itemID, frameItemID))
-        protectedBackForwardList()->commitProvisionalItem(*frameItem);
 }
 
 void WebPageProxy::backForwardItemAtIndex(int32_t index, FrameIdentifier frameID, CompletionHandler<void(RefPtr<FrameState>&&)>&& completionHandler)
