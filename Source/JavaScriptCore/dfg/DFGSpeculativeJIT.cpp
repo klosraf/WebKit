@@ -15584,8 +15584,11 @@ void SpeculativeJIT::compileHasIndexedProperty(Node* node, S_JITOperation_GCZ sl
     addSlowPathGeneratorLambda([=, this, savePlans = WTFMove(savePlans), slowCases = WTFMove(slowCases)]() {
         slowCases.link(this);
 
-        if (preserveIndexReg)
+        if (preserveIndexReg) {
             pushToSave(indexGPR);
+            if (!isARM64())
+                pushToSave(indexGPR);
+        }
         silentSpill(savePlans);
 
         setupArguments<S_JITOperation_GCZ>(LinkableConstant::globalObject(*this, node), baseGPR, indexGPR);
@@ -15598,8 +15601,11 @@ void SpeculativeJIT::compileHasIndexedProperty(Node* node, S_JITOperation_GCZ sl
         setupResults(resultGPR);
 
         silentFill(savePlans);
-        if (preserveIndexReg)
+        if (preserveIndexReg) {
+            if (!isARM64())
+                popToRestore(indexGPR);
             popToRestore(indexGPR);
+        }
 
         if (exceptionReg)
             exceptionCheck(*exceptionReg);
