@@ -11561,7 +11561,6 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
     parameters.overriddenMediaType = m_overriddenMediaType;
     parameters.corsDisablingPatterns = corsDisablingPatterns();
     parameters.maskedURLSchemes = configuration->maskedURLSchemes();
-    parameters.userScriptsShouldWaitUntilNotification = configuration->userScriptsShouldWaitUntilNotification();
     parameters.allowedNetworkHosts = configuration->allowedNetworkHosts();
     parameters.loadsSubresources = configuration->loadsSubresources();
     parameters.crossOriginAccessControlCheckEnabled = configuration->crossOriginAccessControlCheckEnabled();
@@ -12616,19 +12615,6 @@ void WebPageProxy::updateWebsitePolicies(WebsitePoliciesData&& websitePolicies)
     forEachWebContentProcess([&] (auto& process, auto pageID) {
         process.send(Messages::WebPage::UpdateWebsitePolicies(websitePolicies), pageID);
     });
-}
-
-void WebPageProxy::notifyUserScripts()
-{
-    m_userScriptsNotified = true;
-    send(Messages::WebPage::NotifyUserScripts());
-}
-
-bool WebPageProxy::userScriptsNeedNotification() const
-{
-    if (!m_configuration->userScriptsShouldWaitUntilNotification())
-        return false;
-    return !m_userScriptsNotified;
 }
 
 void WebPageProxy::didFinishLoadingDataForCustomContentProvider(const String& suggestedFilename, std::span<const uint8_t> dataReference)

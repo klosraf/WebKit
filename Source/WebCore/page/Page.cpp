@@ -499,9 +499,6 @@ Page::Page(PageConfiguration&& pageConfiguration)
 
     settingsDidChange();
 
-    if (!pageConfiguration.userScriptsShouldWaitUntilNotification)
-        m_hasBeenNotifiedToInjectUserScripts = true;
-
     if (m_lowPowerModeNotifier->isLowPowerModeEnabled())
         m_throttlingReasons.add(ThrottlingReason::LowPowerMode);
 
@@ -3810,15 +3807,6 @@ UserContentProvider& Page::userContentProvider()
 Ref<UserContentProvider> Page::protectedUserContentProvider()
 {
     return m_userContentProvider;
-}
-
-void Page::notifyToInjectUserScripts()
-{
-    m_hasBeenNotifiedToInjectUserScripts = true;
-
-    forEachLocalFrame([] (LocalFrame& frame) {
-        frame.injectUserScriptsAwaitingNotification();
-    });
 }
 
 void Page::setUserContentProvider(Ref<UserContentProvider>&& userContentProvider)

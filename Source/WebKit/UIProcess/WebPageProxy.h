@@ -898,8 +898,6 @@ public:
     bool willHandleHorizontalScrollEvents() const;
 
     void updateWebsitePolicies(WebsitePoliciesData&&);
-    void notifyUserScripts();
-    bool userScriptsNeedNotification() const;
 
     bool canShowMIMEType(const String& mimeType);
 
