@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2022-2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -4520,6 +4520,7 @@ void WebExtensionContext::addInjectedContent(const InjectedContentVector& inject
         auto injectionTime = toImpl(injectedContentData.injectionTime);
         Ref executionWorld = toContentWorld(injectedContentData.contentWorldType);
         auto styleLevel = injectedContentData.styleLevel;
+        auto matchParentFrame = injectedContentData.matchParentFrame;
 
         auto scriptID = injectedContentData.identifier;
         bool isRegisteredScript = !scriptID.isEmpty();
@@ -4534,7 +4535,7 @@ void WebExtensionContext::addInjectedContent(const InjectedContentVector& inject
                 continue;
             }
 
-            Ref userScript = API::UserScript::create(WebCore::UserScript { WTFMove(scriptString), URL { m_baseURL, scriptPath }, makeVector<String>(includeMatchPatterns), makeVector<String>(excludeMatchPatterns), injectionTime, injectedFrames }, executionWorld);
+            Ref userScript = API::UserScript::create(WebCore::UserScript { WTFMove(scriptString), URL { m_baseURL, scriptPath }, makeVector<String>(includeMatchPatterns), makeVector<String>(excludeMatchPatterns), injectionTime, injectedFrames, matchParentFrame }, executionWorld);
             originInjectedScripts.append(userScript);
 
             for (Ref userContentController : userContentControllers)
@@ -4560,7 +4561,7 @@ void WebExtensionContext::addInjectedContent(const InjectedContentVector& inject
 
             styleSheetString = localizedResourceString(styleSheetString, "text/css"_s);
 
-            Ref userStyleSheet = API::UserStyleSheet::create(WebCore::UserStyleSheet { WTFMove(styleSheetString), URL { m_baseURL, styleSheetPath }, makeVector<String>(includeMatchPatterns), makeVector<String>(excludeMatchPatterns), injectedFrames, styleLevel, std::nullopt }, executionWorld);
+            Ref userStyleSheet = API::UserStyleSheet::create(WebCore::UserStyleSheet { WTFMove(styleSheetString), URL { m_baseURL, styleSheetPath }, makeVector<String>(includeMatchPatterns), makeVector<String>(excludeMatchPatterns), injectedFrames, matchParentFrame, styleLevel, std::nullopt }, executionWorld);
             originInjectedStyleSheets.append(userStyleSheet);
 
             for (Ref userContentController : userContentControllers)
