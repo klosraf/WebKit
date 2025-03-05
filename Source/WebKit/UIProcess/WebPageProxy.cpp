@@ -7118,11 +7118,6 @@ void WebPageProxy::didCommitLoadForFrame(IPC::Connection& connection, FrameIdent
     if (frame->isMainFrame() && preferences->textExtractionEnabled())
         prepareTextExtractionSupportIfNeeded();
 #endif
-
-    if (isBackForwardLoadType(frameLoadType)) {
-        if (RefPtr provisionalItem = m_backForwardList->provisionalItem(); provisionalItem && provisionalItem->navigatedFrameID() == frameID)
-            m_backForwardList->commitProvisionalItem();
-    }
 }
 
 void WebPageProxy::didFinishDocumentLoadForFrame(IPC::Connection& connection, FrameIdentifier frameID, std::optional<WebCore::NavigationIdentifier> navigationID, const UserData& userData, WallTime timestamp)
@@ -9568,30 +9563,6 @@ void WebPageProxy::backForwardGoToItemShared(BackForwardItemIdentifier itemID, C
 
     backForwardList->goToItem(*item);
     completionHandler(backForwardList->counts());
-}
-
-void WebPageProxy::backForwardGoToProvisionalItem(IPC::Connection& connection, BackForwardItemIdentifier itemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
-{
-    Ref backForwardList = m_backForwardList;
-    MESSAGE_CHECK_COMPLETION_BASE(!WebKit::isInspectorPage(*this), connection, completionHandler(backForwardList->counts()));
-
-    if (m_provisionalPage)
-        return completionHandler(backForwardList->counts());
-
-    RefPtr item = backForwardList->itemForID(itemID);
-    if (!item)
-        return completionHandler(backForwardList->counts());
-
-    backForwardList->goToProvisionalItem(*item);
-    completionHandler(backForwardList->counts());
-}
-
-void WebPageProxy::backForwardClearProvisionalItem(IPC::Connection& connection, BackForwardItemIdentifier itemID, BackForwardFrameItemIdentifier frameItemID, CompletionHandler<void(const WebBackForwardListCounts&)>&& completionHandler)
-{
-    MESSAGE_CHECK_BASE(!WebKit::isInspectorPage(*this), connection);
-    if (RefPtr frameItem = WebBackForwardListFrameItem::itemForID(itemID, frameItemID))
-        protectedBackForwardList()->clearProvisionalItem(*frameItem);
-    completionHandler(m_backForwardList->counts());
 }
 
 void WebPageProxy::backForwardItemAtIndex(int32_t index, FrameIdentifier frameID, CompletionHandler<void(RefPtr<FrameState>&&)>&& completionHandler)

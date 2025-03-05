@@ -212,8 +212,6 @@ messages -> WebPageProxy {
     BackForwardListContainsItem(WebCore::BackForwardItemIdentifier itemID) -> (bool contains) Synchronous
     BackForwardListCounts() -> (struct WebKit::WebBackForwardListCounts counts) Synchronous
     ShouldGoToBackForwardListItemSync(WebCore::BackForwardItemIdentifier itemID, bool isBackForwardCache) -> (bool shouldGoToItem) Synchronous
-    BackForwardGoToProvisionalItem(WebCore::BackForwardItemIdentifier itemID) -> (struct WebKit::WebBackForwardListCounts counts) Synchronous
-    BackForwardClearProvisionalItem(WebCore::BackForwardItemIdentifier itemID, WebCore::BackForwardFrameItemIdentifier frameItemID) -> (struct WebKit::WebBackForwardListCounts counts) Synchronous
 
     # Undo/Redo messages
     RegisterEditCommandForUndo(uint64_t commandID, String label) AllowedWhenWaitingForSyncReply
