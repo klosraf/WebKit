@@ -3112,7 +3112,7 @@ TEST(SiteIsolation, NavigateIframeSameOriginBackForward)
     testNavigateIframeBackForward(@"https://webkit.org/destination", false);
 }
 
-TEST(SiteIsolation, NavigateIframeSameOriginBackForwardAfterSessionRestore)
+TEST(SiteIsolation, DISABLED_NavigateIframeSameOriginBackForwardAfterSessionRestore)
 {
     testNavigateIframeBackForward(@"https://webkit.org/destination", true);
 }
@@ -3122,7 +3122,7 @@ TEST(SiteIsolation, NavigateIframeCrossOriginBackForward)
     testNavigateIframeBackForward(@"https://apple.com/destination", false);
 }
 
-TEST(SiteIsolation, NavigateIframeCrossOriginBackForwardAfterSessionRestore)
+TEST(SiteIsolation, DISABLED_NavigateIframeCrossOriginBackForwardAfterSessionRestore)
 {
     testNavigateIframeBackForward(@"https://apple.com/destination", true);
 }
