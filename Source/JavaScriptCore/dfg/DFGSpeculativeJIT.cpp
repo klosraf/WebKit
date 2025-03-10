@@ -13407,6 +13407,9 @@ void SpeculativeJIT::compileRecordRegExpCachedResult(Node* node)
     store8(
         TrustedImm32(0),
         Address(globalObjectGPR, offset + RegExpCachedResult::offsetOfReified()));
+    store8(
+        TrustedImm32(0),
+        Address(globalObjectGPR, offset + RegExpCachedResult::offsetOfOneCharacterMatch()));
 
     noResult(node);
 }
