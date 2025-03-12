@@ -87,30 +87,31 @@ void IsoSubspace::didBeginSweepingToFreeList(MarkedBlock::Handle* block)
 
 void* IsoSubspace::tryAllocatePreciseOrLowerTierPrecise(size_t size)
 {
-    auto revive = [&] (PreciseAllocation* allocation, bool isNewAllocation) {
-        m_space.registerPreciseAllocation(allocation, isNewAllocation);
-        ASSERT(allocation->indexInSpace() == m_space.m_preciseAllocations.size() - 1);
+    auto revive = [&] (PreciseAllocation* allocation) {
+        // Lower-tier cells never report capacity. This is intentional since it will not be freed until VM dies.
+        // Whether we will do GC or not does not affect on the used memory by lower-tier cells. So we should not
+        // count them in capacity since it is not interesting to decide whether we should do GC.
         m_preciseAllocations.append(allocation);
+        m_space.registerPreciseAllocation(allocation, /* isNewAllocation */ false);
+        ASSERT(allocation->indexInSpace() == m_space.m_preciseAllocations.size() - 1);
         return allocation->cell();
     };
 
     if (UNLIKELY(m_isPreciseOnly)) {
         PreciseAllocation* allocation = PreciseAllocation::tryCreate(m_space.heap(), size, this, 0);
-        return allocation ? revive(allocation, true) : nullptr;
+        return allocation ? revive(allocation) : nullptr;
     }
 
     ASSERT_WITH_MESSAGE(cellSize() == size, "non-preciseOnly IsoSubspaces shouldn't have variable size");
     if (!m_lowerTierPreciseFreeList.isEmpty()) {
         PreciseAllocation* allocation = &*m_lowerTierPreciseFreeList.begin();
         allocation->remove();
-        return revive(allocation, false);
+        return revive(allocation);
     }
     if (m_remainingLowerTierPreciseCount) {
         PreciseAllocation* allocation = PreciseAllocation::tryCreateForLowerTierPrecise(m_space.heap(), size, this, --m_remainingLowerTierPreciseCount);
-        if (allocation) {
-            // FIXME: This is new allocation but reporting it as new causes a bunch of regressions...
-            return revive(allocation, false);
-        }
+        if (allocation)
+            return revive(allocation);
     }
     return nullptr;
 }
