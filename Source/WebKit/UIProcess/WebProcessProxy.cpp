@@ -955,7 +955,7 @@ void WebProcessProxy::didDestroyWebUserContentControllerProxy(WebUserContentCont
 static bool networkProcessWillCheckBlobFileAccess()
 {
 #if PLATFORM(COCOA)
-    return WTF::linkedOnOrAfterSDKWithBehavior(SDKAlignedBehavior::BlobFileAccessEnforcement);
+    return WTF::linkedOnOrAfterSDKWithBehavior(SDKAlignedBehavior::BlobFileAccessEnforcementAndNetworkProcessRoundTrip);
 #else
     return true;
 #endif
