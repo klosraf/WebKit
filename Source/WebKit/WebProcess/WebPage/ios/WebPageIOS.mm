@@ -1223,7 +1223,7 @@ void WebPage::sendTapHighlightForNodeIfNecessary(WebKit::TapIdentifier requestID
 
     if (RefPtr element = dynamicDowncast<Element>(*node)) {
         ASSERT(m_page);
-        localMainFrame->loader().client().prefetchDNS(element->absoluteLinkURL().host().toString());
+        localMainFrame->loader().prefetchDNSIfNeeded(element->absoluteLinkURL());
     }
 
     if (RefPtr area = dynamicDowncast<HTMLAreaElement>(*node)) {
