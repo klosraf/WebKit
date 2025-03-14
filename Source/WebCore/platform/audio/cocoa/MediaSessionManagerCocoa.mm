@@ -201,6 +201,10 @@ void MediaSessionManagerCocoa::updateSessionState()
 
     m_previousCategory = category;
     AudioSession::sharedSession().setCategory(category, mode, policy);
+
+    forEachSession([&] (auto& session) {
+        session.audioSessionCategoryChanged(category, mode, policy);
+    });
 }
 
 void MediaSessionManagerCocoa::possiblyChangeAudioCategory()
