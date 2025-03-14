@@ -1,3 +1,18 @@
+=================
+WPE WebKit 2.48.0
+=================
+
+What's new in WPE WebKit 2.48.0?
+
+  - Fix YouTube playback by using a different User-Agent quirk.
+  - Avoid adding redundant tracks to MediaPlayer.
+  - Propagate the font's computed locale to HarfBuzz.
+  - Fix missing default values for the key repeat delay, key repeat interval,
+    and drag threshold in WPESettings.
+  - Fix missing registration for the DRM scale setting in WPESettings.
+  - Fix the build on non-Linux platforms.
+  - Fix several crashes and rendering issues.
+
 ==================
 WPE WebKit 2.47.90
 ==================
