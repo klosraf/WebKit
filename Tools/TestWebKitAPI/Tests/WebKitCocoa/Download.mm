@@ -1540,6 +1540,9 @@ TEST(WKDownload, FinishSuccessfully)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -1651,6 +1654,9 @@ TEST(WKDownload, CancelAndResume)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -1691,6 +1697,9 @@ TEST(WKDownload, FailAndResume)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError,
     });
 }
@@ -1726,6 +1735,9 @@ TEST(WKDownload, CancelNoResumeData)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -1763,6 +1775,9 @@ TEST(WKDownload, FailNoResumeData)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError
     });
 }
@@ -1892,6 +1907,9 @@ void testResumeAfterMutatingDisk(NSURLRequest *serverRequest, NSURL *expectedDow
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -2053,6 +2071,9 @@ TEST(WKDownload, ResumeCantReconnect)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError
     });
 }
@@ -2096,6 +2117,9 @@ TEST(WKDownload, UnknownContentLength)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -2119,6 +2143,9 @@ TEST(WKDownload, InvalidArguments)
     Util::run(&caughtException);
     checkCallbackRecord(delegate.get(), {
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -2172,6 +2199,9 @@ TEST(WKDownload, RedirectAllow)
     checkCallbackRecord(delegate.get(), {
         DownloadCallback::WillRedirect,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -2275,6 +2305,9 @@ TEST(WKDownload, DownloadRequest404)
 
     checkCallbackRecord(delegate.get(), {
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish,
     });
 }
@@ -2311,10 +2344,8 @@ TEST(WKDownload, DecidePlaceholderPolicy)
     });
 }
 
-TEST(WKDownload, PlaceholderPolicyEnableWithModernDownloadProgressEnabled)
+TEST(WKDownload, PlaceholderPolicyEnable)
 {
-    CFPreferencesSetAppValue(CFSTR("EnableModernDownloadProgress"), kCFBooleanTrue, kCFPreferencesAnyApplication);
-
     HTTPServer server({
         { "/"_s, { 404, { }, "http body"_s } }
     });
@@ -2343,52 +2374,16 @@ TEST(WKDownload, PlaceholderPolicyEnableWithModernDownloadProgressEnabled)
     checkCallbackRecord(delegate.get(), {
         DownloadCallback::DecideDestination,
         DownloadCallback::DecidePlaceholderPolicy,
+#if !PLATFORM(IOS_SIMULATOR)
         DownloadCallback::DidReceivePlaceholderURL,
         DownloadCallback::DidReceiveFinalURL,
-        DownloadCallback::DidFinish,
-    });
-}
-
-TEST(WKDownload, PlaceholderPolicyEnableWithModernDownloadProgressDisabled)
-{
-    CFPreferencesSetAppValue(CFSTR("EnableModernDownloadProgress"), kCFBooleanFalse, kCFPreferencesAnyApplication);
-
-    HTTPServer server({
-        { "/"_s, { 404, { }, "http body"_s } }
-    });
-    NSURL *expectedDownloadFile = tempFileThatDoesNotExist();
-    auto delegate = adoptNS([TestDownloadDelegate new]);
-    auto webView = adoptNS([WKWebView new]);
-    [webView setNavigationDelegate:delegate.get()];
-
-    __block bool didFinish = false;
-    [webView startDownloadUsingRequest:server.request() completionHandler:^(WKDownload *download) {
-        download.delegate = delegate.get();
-        delegate.get().decideDestinationUsingResponse = ^(WKDownload *, NSURLResponse *, NSString *, void (^completionHandler)(NSURL *)) {
-            completionHandler(expectedDownloadFile);
-        };
-        delegate.get().decidePlaceholderPolicy = ^(WKDownload *, void (^completionHandler)(_WKPlaceholderPolicy, NSURL *)) {
-            completionHandler(_WKPlaceholderPolicyEnable, nil);
-        };
-        delegate.get().downloadDidFinish = ^(WKDownload *download) {
-            didFinish = true;
-        };
-    }];
-    Util::run(&didFinish);
-
-    checkFileContents(expectedDownloadFile, "http body"_s);
-
-    checkCallbackRecord(delegate.get(), {
-        DownloadCallback::DecideDestination,
-        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish,
     });
 }
 
 TEST(WKDownload, PlaceholderPolicyDisable)
 {
-    CFPreferencesSetAppValue(CFSTR("EnableModernDownloadProgress"), kCFBooleanTrue, kCFPreferencesAnyApplication);
-
     HTTPServer server({
         { "/"_s, { 404, { }, "http body"_s } }
     });
@@ -2466,6 +2461,9 @@ TEST(WKDownload, NetworkProcessCrash)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError
     });
 }
@@ -2497,6 +2495,9 @@ TEST(WKDownload, SuggestedFilenameFromHost)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -2545,6 +2546,9 @@ TEST(WKDownload, PathMustExist)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError
     });
 }
@@ -2580,6 +2584,9 @@ TEST(WKDownload, FileMustNotExist)
     Util::run(&failed);
 
     checkCallbackRecord(retainedDelegate.get(), {
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError,
     });
 }
@@ -2610,6 +2617,9 @@ TEST(WKDownload, DestinationNullString)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFailWithError
     });
 }
@@ -2642,6 +2652,9 @@ TEST(WKDownload, ChallengeSuccess)
     checkCallbackRecord(delegate.get(), {
         DownloadCallback::AuthenticationChallenge,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -2736,6 +2749,9 @@ TEST(WKDownload, BlobResponse)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 
@@ -2744,6 +2760,9 @@ TEST(WKDownload, BlobResponse)
         DownloadCallback::NavigationAction,
         DownloadCallback::NavigationActionBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -2784,7 +2803,10 @@ TEST(WKDownload, BlobResponseNoFilename)
         DownloadCallback::NavigationAction,
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
-        DownloadCallback::DecideDestination
+        DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -2900,7 +2922,10 @@ TEST(WKDownload, SubframeOriginator)
         DownloadCallback::NavigationAction,
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
-        DownloadCallback::DecideDestination
+        DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
     });
 }
 
@@ -2953,6 +2978,9 @@ TEST(WKDownload, LockdownModePDF)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
@@ -3001,6 +3029,9 @@ TEST(WKDownload, LockdownModeUSDZ)
         DownloadCallback::NavigationResponse,
         DownloadCallback::NavigationResponseBecameDownload,
         DownloadCallback::DecideDestination,
+#if HAVE(MODERN_DOWNLOADPROGRESS)
+        DownloadCallback::DecidePlaceholderPolicy,
+#endif
         DownloadCallback::DidFinish
     });
 }
