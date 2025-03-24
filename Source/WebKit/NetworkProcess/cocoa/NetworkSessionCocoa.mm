@@ -1116,7 +1116,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         if (metrics._establishmentReport) {
             if (RetainPtr endpoint = nw_establishment_report_copy_proxy_endpoint(metrics._establishmentReport)) {
                 if (const char *hostname = nw_endpoint_get_hostname(endpoint.get()))
-                    proxyName = String::fromUTF8(unsafeMakeSpan(hostname, strlen(hostname)));
+                    proxyName = String::fromUTF8(unsafeSpan(hostname));
             }
         }
 
