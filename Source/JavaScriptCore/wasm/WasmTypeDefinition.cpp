@@ -30,6 +30,7 @@
 
 #include "JSCJSValueInlines.h"
 #include "JSWebAssemblyArray.h"
+#include "JSWebAssemblyException.h"
 #include "JSWebAssemblyStruct.h"
 #include "WasmCallee.h"
 #include "WasmFormat.h"
