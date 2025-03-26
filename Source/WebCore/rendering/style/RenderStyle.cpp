@@ -2738,6 +2738,11 @@ const FontCascade& RenderStyle::fontCascade() const
     return m_inheritedData->fontData->fontCascade;
 }
 
+FontCascade& RenderStyle::fontCascade()
+{
+    return m_inheritedData.access().fontData.access().fontCascade;
+}
+
 const FontMetrics& RenderStyle::metricsOfPrimaryFont() const
 {
     return m_inheritedData->fontData->fontCascade.metricsOfPrimaryFont();
