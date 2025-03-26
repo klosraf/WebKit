@@ -500,6 +500,9 @@ VM::~VM()
     smallStrings.setIsInitialized(false);
     heap.lastChanceToFinalize();
 
+    while (!m_microtaskQueues.isEmpty())
+        m_microtaskQueues.begin()->remove();
+
     JSRunLoopTimer::Manager::shared().unregisterVM(*this);
 
     VMInspector::singleton().remove(this);
@@ -1354,14 +1357,9 @@ void VM::drainMicrotasks()
         m_defaultMicrotaskQueue.clear();
     else {
         do {
-            while (!m_defaultMicrotaskQueue.isEmpty()) {
-                auto task = m_defaultMicrotaskQueue.dequeue();
-                task.run();
-                if (UNLIKELY(hasPendingTerminationException()))
-                    return;
-                if (m_onEachMicrotaskTick)
-                    m_onEachMicrotaskTick(*this);
-            }
+            m_defaultMicrotaskQueue.performMicrotaskCheckpoint(*this);
+            if (UNLIKELY(hasPendingTerminationException()))
+                return;
             didExhaustMicrotaskQueue();
             if (UNLIKELY(hasPendingTerminationException()))
                 return;
@@ -1625,15 +1623,17 @@ void VM::removeLoopHintExecutionCounter(const JSInstruction* instruction)
 
 void VM::beginMarking()
 {
-    for (auto& microtaskQueue : m_microtaskQueues)
-        microtaskQueue.beginMarking();
+    m_microtaskQueues.forEach([&](MicrotaskQueue* microtaskQueue) {
+        microtaskQueue->beginMarking();
+    });
 }
 
 template<typename Visitor>
 void VM::visitAggregateImpl(Visitor& visitor)
 {
-    for (auto& microtaskQueue : m_microtaskQueues)
-        microtaskQueue.visitAggregate(visitor);
+    m_microtaskQueues.forEach([&](MicrotaskQueue* microtaskQueue) {
+        microtaskQueue->visitAggregate(visitor);
+    });
     numericStrings.visitAggregate(visitor);
     m_builtinExecutables->visitAggregate(visitor);
     m_regExpCache->visitAggregate(visitor);
