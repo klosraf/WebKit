@@ -3036,3 +3036,10 @@ webkit.org/b/286392 imported/w3c/web-platform-tests/css/css-grid/subgrid/subgrid
 webkit.org/b/286602 media/media-source/media-detachablemse-append.html [ Pass Failure ]
 
 webkit.org/b/287713 printing/background-clip-text.html [ Skip ]
+
+webkit.org/b/288769 fast/ruby/after-block-doesnt-crash.html [ Failure Pass ]
+webkit.org/b/288769 fast/ruby/after-table-doesnt-crash.html [ Failure Pass ]
+webkit.org/b/288769 fast/ruby/before-block-doesnt-crash.html [ Failure Pass ]
+webkit.org/b/288769 fast/ruby/generated-after-counter-doesnt-crash.html [ Failure Pass ]
+webkit.org/b/288769 fast/ruby/generated-before-and-after-counter-doesnt-crash.html [ Failure Pass ]
+webkit.org/b/288769 fast/ruby/generated-before-counter-doesnt-crash.html [ Failure Pass ]

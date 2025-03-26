@@ -7703,3 +7703,7 @@ ipc/create-media-source-with-invalid-constraints-crash.html [ Skip ]
 ipc/create-image-buffer-crash.html [ Skip ]
 ipc/validate-media-constraint.html [ Skip ]
 ipc/validate-message-check-in-networkconnectiontowebprocess.html [ Skip ]
+
+# This test is flaky. Resizing the window exposures the failure
+webkit.org/b/288689 svg/text/bidi-text-query.svg [ Skip ]
+
