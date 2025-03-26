@@ -234,6 +234,7 @@ struct PatternTerm {
             bool isCopy : 1;
             bool isTerminal : 1;
             bool isStringList : 1;
+            bool isEOLStringList: 1;
         } parentheses;
         struct {
             bool bolAnchor : 1;
@@ -276,6 +277,7 @@ struct PatternTerm {
         parentheses.isCopy = false;
         parentheses.isTerminal = false;
         parentheses.isStringList = false;
+        parentheses.isEOLStringList = false;
         quantityType = QuantifierType::FixedCount;
         quantityMinCount = quantityMaxCount = 1;
     }
