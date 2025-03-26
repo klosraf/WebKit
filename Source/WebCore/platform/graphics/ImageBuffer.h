@@ -50,7 +50,6 @@
 #endif
 
 #if USE(SKIA)
-class GrDirectContext;
 class SkSurface;
 #endif
 
@@ -187,12 +186,6 @@ public:
 
 #if USE(SKIA)
     SkSurface* surface() const;
-
-    // FIXME: Remove the obsolete Skia specific methods below.
-    void finishAcceleratedRenderingAndCreateFence();
-    void waitForAcceleratedRenderingFenceCompletion();
-    const GrDirectContext* skiaGrContext() const;
-    RefPtr<ImageBuffer> copyAcceleratedImageBufferBorrowingBackendRenderTarget() const;
 #endif
 
 #if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
