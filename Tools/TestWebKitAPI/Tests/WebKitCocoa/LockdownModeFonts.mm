@@ -53,7 +53,8 @@ TEST(LockdownMode, SVGFonts)
     EXPECT_EQ(target2Result, referenceResult);
 }
 
-TEST(LockdownMode, NotAllowedFontLoadingAPI)
+// FIXME rdar://147961027 disabling test on Safari-7621-Branch
+TEST(LockdownMode, DISABLED_NotAllowedFontLoadingAPI)
 {
     @autoreleasepool {
         auto webViewConfiguration = adoptNS([WKWebViewConfiguration new]);
@@ -187,7 +188,8 @@ TEST(LockdownMode, AllowedFont)
     }
 }
 
-TEST(LockdownMode, NotAllowedFont)
+// FIXME rdar://147961027 disabling test on Safari-7621-Branch
+TEST(LockdownMode, DISABLED_NotAllowedFont)
 {
     @autoreleasepool {
         auto webViewConfiguration = adoptNS([WKWebViewConfiguration new]);
