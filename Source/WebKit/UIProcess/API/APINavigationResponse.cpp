@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,34 +23,35 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "config.h"
+#include "APINavigationResponse.h"
 
-#include "WebFrameMetrics.h"
-#include <WebCore/FrameIdentifier.h>
-#include <WebCore/ResourceRequest.h>
-#include <WebCore/ScriptExecutionContextIdentifier.h>
-#include <WebCore/SecurityOriginData.h>
-#include <wtf/ProcessID.h>
+#include "APIFrameInfo.h"
+#include "APINavigation.h"
+#include "WebFrameProxy.h"
 
-namespace WebKit {
+namespace API {
 
-enum class FrameType : bool { Local, Remote };
+NavigationResponse::NavigationResponse(API::FrameInfo& frame, const WebCore::ResourceRequest& request, const WebCore::ResourceResponse& response, bool canShowMIMEType, const WTF::String& downloadAttribute, Navigation* navigation)
+    : m_frame(frame)
+    , m_request(request)
+    , m_response(response)
+    , m_canShowMIMEType(canShowMIMEType)
+    , m_downloadAttribute(downloadAttribute)
+    , m_navigation(navigation) { }
 
-struct FrameInfoData {
-    WTF_MAKE_STRUCT_FAST_ALLOCATED;
+NavigationResponse::~NavigationResponse() = default;
 
-    bool isMainFrame { false };
-    FrameType frameType { FrameType::Local };
-    WebCore::ResourceRequest request;
-    WebCore::SecurityOriginData securityOrigin;
-    String frameName;
-    Markable<WebCore::FrameIdentifier> frameID;
-    Markable<WebCore::FrameIdentifier> parentFrameID;
-    Markable<WebCore::ScriptExecutionContextIdentifier> documentID;
-    ProcessID processID;
-    bool isFocused { false };
-    bool errorOccurred { false };
-    WebFrameMetrics frameMetrics { };
-};
+FrameInfo* NavigationResponse::navigationInitiatingFrame()
+{
+    if (m_sourceFrame)
+        return m_sourceFrame.get();
+    if (!m_navigation)
+        return nullptr;
+    auto& frameInfo = m_navigation->originatingFrameInfo();
+    RefPtr frame = WebKit::WebFrameProxy::webFrame(frameInfo.frameID);
+    m_sourceFrame = FrameInfo::create(FrameInfoData { frameInfo }, frame ? frame->page() : nullptr);
+    return m_sourceFrame.get();
+}
 
 }

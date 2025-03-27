@@ -121,8 +121,8 @@ TEST(WebKit, DecidePolicyForNavigationActionReload)
     TestWebKitAPI::Util::run(&decidedPolicy);
 
     EXPECT_EQ(WKNavigationTypeReload, [action navigationType]);
-    EXPECT_TRUE([action sourceFrame] != [action targetFrame]);
-    EXPECT_EQ(nil, [action sourceFrame]);
+    EXPECT_EQ([action sourceFrame], [action targetFrame]);
+    EXPECT_WK_STREQ([action sourceFrame].request.URL.absoluteString, "data:text/html,First");
     EXPECT_WK_STREQ(firstURL, [[[action request] URL] absoluteString]);
     EXPECT_WK_STREQ(firstURL, [[[[action targetFrame] request] URL] absoluteString]);
     EXPECT_EQ(webView.get(), [[action targetFrame] webView]);
@@ -151,8 +151,8 @@ TEST(WebKit, DecidePolicyForNavigationActionReloadFromOrigin)
     TestWebKitAPI::Util::run(&decidedPolicy);
 
     EXPECT_EQ(WKNavigationTypeReload, [action navigationType]);
-    EXPECT_TRUE([action sourceFrame] != [action targetFrame]);
-    EXPECT_EQ(nil, [action sourceFrame]);
+    EXPECT_EQ([action sourceFrame], [action targetFrame]);
+    EXPECT_WK_STREQ([action sourceFrame].request.URL.absoluteString, "data:text/html,First");
     EXPECT_WK_STREQ(firstURL, [[[action request] URL] absoluteString]);
     EXPECT_WK_STREQ(firstURL, [[[[action targetFrame] request] URL] absoluteString]);
     EXPECT_EQ(webView.get(), [[action targetFrame] webView]);
@@ -185,8 +185,8 @@ TEST(WebKit, DecidePolicyForNavigationActionGoBack)
     TestWebKitAPI::Util::run(&decidedPolicy);
 
     EXPECT_EQ(WKNavigationTypeBackForward, [action navigationType]);
-    EXPECT_TRUE([action sourceFrame] != [action targetFrame]);
-    EXPECT_EQ(nil, [action sourceFrame]);
+    EXPECT_EQ([action sourceFrame], [action targetFrame]);
+    EXPECT_WK_STREQ([action sourceFrame].request.URL.absoluteString, "data:text/html,Second");
     EXPECT_WK_STREQ(firstURL, [[[action request] URL] absoluteString]);
     EXPECT_WK_STREQ(secondURL, [[[[action targetFrame] request] URL] absoluteString]);
     EXPECT_EQ(webView.get(), [[action targetFrame] webView]);
@@ -223,8 +223,8 @@ TEST(WebKit, DecidePolicyForNavigationActionGoForward)
     TestWebKitAPI::Util::run(&decidedPolicy);
 
     EXPECT_EQ(WKNavigationTypeBackForward, [action navigationType]);
-    EXPECT_TRUE([action sourceFrame] != [action targetFrame]);
-    EXPECT_EQ(nil, [action sourceFrame]);
+    EXPECT_EQ([action sourceFrame], [action targetFrame]);
+    EXPECT_WK_STREQ([action sourceFrame].request.URL.absoluteString, "data:text/html,First");
     EXPECT_WK_STREQ(secondURL, [[[action request] URL] absoluteString]);
     EXPECT_WK_STREQ(firstURL, [[[[action targetFrame] request] URL] absoluteString]);
     EXPECT_EQ(webView.get(), [[action targetFrame] webView]);
@@ -369,7 +369,7 @@ TEST(WebKit, DecidePolicyForNavigationActionOpenNewWindowAndDeallocSourceWebView
 
     EXPECT_EQ(WKNavigationTypeOther, [action navigationType]);
     EXPECT_TRUE([action sourceFrame] != [action targetFrame]);
-    EXPECT_EQ(nil, [[action sourceFrame] webView]);
+    EXPECT_EQ(newWebView.get(), [[action sourceFrame] webView]);
     EXPECT_EQ(newWebView.get(), [[action targetFrame] webView]);
 
     newWebView = nullptr;

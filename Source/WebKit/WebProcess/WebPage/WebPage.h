@@ -1938,6 +1938,8 @@ public:
 
     void didProgrammaticallyClearTextFormControl(const WebCore::HTMLTextFormControlElement&);
 
+    std::unique_ptr<FrameInfoData> takeMainFrameNavigationInitiator();
+
 private:
     WebPage(WebCore::PageIdentifier, WebPageCreationParameters&&);
 
@@ -3003,6 +3005,7 @@ private:
 #endif
 
     std::unique_ptr<WebCore::NowPlayingMetadataObserver> m_nowPlayingMetadataObserver;
+    std::unique_ptr<FrameInfoData> m_mainFrameNavigationInitiator;
 
     mutable RefPtr<Logger> m_logger;
 };
