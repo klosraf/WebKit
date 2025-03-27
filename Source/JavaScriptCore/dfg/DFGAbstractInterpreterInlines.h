@@ -4117,6 +4117,11 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
         break;
     }
 
+    case DataViewGetByteLengthAsInt52:
+        setNonCellTypeForNode(node, SpecInt52Any);
+        break;
+
+    case DataViewGetByteLength:
     case GetVectorLength: {
         setNonCellTypeForNode(node, SpecInt32Only);
         break;

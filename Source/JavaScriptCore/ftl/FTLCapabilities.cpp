@@ -469,6 +469,8 @@ inline CapabilityLevel canCompile(Node* node)
     case CreatePromise:
     case CreateGenerator:
     case CreateAsyncGenerator:
+    case DataViewGetByteLength:
+    case DataViewGetByteLengthAsInt52:
     case DataViewGetInt:
     case DataViewGetFloat:
     case DataViewSet:
