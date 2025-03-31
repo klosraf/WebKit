@@ -30,8 +30,6 @@
 #include <wtf/TZoneMalloc.h>
 #include <wtf/WorkerPool.h>
 
-class SkImage;
-
 namespace WebCore {
 
 class BitmapTexturePool;
@@ -40,6 +38,7 @@ class GraphicsContext;
 class GraphicsLayer;
 class IntRect;
 class IntSize;
+class SkiaRecordingResult;
 enum class RenderingMode : uint8_t;
 
 class SkiaPaintingEngine {
@@ -54,19 +53,16 @@ public:
     static unsigned numberOfCPUPaintingThreads();
     static unsigned numberOfGPUPaintingThreads();
 
-    Ref<CoordinatedTileBuffer> paintLayer(const GraphicsLayer&, const IntRect& dirtyRect, bool contentsOpaque, float contentsScale);
+    bool useThreadedRendering() const { return m_cpuWorkerPool || m_gpuWorkerPool; }
+
+    Ref<CoordinatedTileBuffer> paint(const GraphicsLayer&, const IntRect& dirtyRect, bool contentsOpaque, float contentsScale);
+    Ref<SkiaRecordingResult> record(const GraphicsLayer&, const IntRect& recordRect, bool contentsOpaque, float contentsScale);
+    Ref<CoordinatedTileBuffer> replay(const RefPtr<SkiaRecordingResult>&, const IntRect& dirtyRect);
 
 private:
     Ref<CoordinatedTileBuffer> createBuffer(RenderingMode, const IntSize&, bool contentsOpaque) const;
 
     void paintIntoGraphicsContext(const GraphicsLayer&, GraphicsContext&, const IntRect&, bool contentsOpaque, float contentsScale) const;
-    bool paintGraphicsLayerIntoBuffer(Ref<CoordinatedTileBuffer>&, const GraphicsLayer&, const IntRect& dirtyRect, bool contentsOpaque, float contentsScale) const;
-
-    // Threaded rendering
-    Ref<CoordinatedTileBuffer> postPaintingTask(const GraphicsLayer&, RenderingMode, const IntRect& dirtyRect, bool contentsOpaque, float contentsScale);
-
-    // Main thread rendering
-    Ref<CoordinatedTileBuffer> performPaintingTask(const GraphicsLayer&, RenderingMode, const IntRect& dirtyRect, bool contentsOpaque, float contentsScale);
 
     RenderingMode renderingMode() const;
     std::optional<RenderingMode> threadedRenderingMode() const;
