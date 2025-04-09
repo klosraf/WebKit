@@ -1987,3 +1987,5 @@ webkit.org/b/286843 [ Debug ] imported/w3c/web-platform-tests/screen-orientation
 [ Sonoma Release ] imported/w3c/web-platform-tests/html/semantics/forms/form-submission-target/rel-button-target.html [ Skip ]
 [ Sonoma Release ] imported/w3c/web-platform-tests/html/semantics/forms/form-submission-target/rel-form-target.html [ Skip ]
 [ Sonoma Release ] imported/w3c/web-platform-tests/html/semantics/forms/form-submission-target/rel-input-target.html [ Skip ]
+
+webkit.org/b/290012 [ Debug ] html5lib/generated/run-entities01-data.html [ Skip ]
