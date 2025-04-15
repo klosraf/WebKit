@@ -763,6 +763,15 @@ WebPageProxy::Internals::Internals(WebPageProxy& page)
 WebPageProxy::Internals::~Internals() = default;
 #endif
 
+#if PLATFORM(MAC)
+// FIXME: Remove this once the cause of rdar://148942809 is found and fixed.
+static std::optional<API::PageConfiguration::OpenerInfo>& openerInfoOfPageBeingOpened()
+{
+    static NeverDestroyed<std::optional<API::PageConfiguration::OpenerInfo>> info;
+    return info.get();
+}
+#endif
+
 WebPageProxy::WebPageProxy(PageClient& pageClient, WebProcessProxy& process, Ref<API::PageConfiguration>&& configuration)
     : m_internals(makeUniqueRefWithoutRefCountedCheck<Internals>(*this))
     , m_identifier(Identifier::generate())
@@ -828,6 +837,11 @@ WebPageProxy::WebPageProxy(PageClient& pageClient, WebProcessProxy& process, Ref
     , m_pageForTesting(WebPageProxyTesting::create(*this))
 {
     WEBPAGEPROXY_RELEASE_LOG(Loading, "constructor:");
+
+#if PLATFORM(MAC)
+    if (openerInfoOfPageBeingOpened() && openerInfoOfPageBeingOpened() != m_configuration->openerInfo())
+        RELEASE_LOG_FAULT(Process, "Created WebPageProxy with wrong configuration");
+#endif
 
     if (!configuration->drawsBackground())
         internals().backgroundColor = Color(Color::transparentBlack);
@@ -8366,6 +8380,11 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
         openedBlobURL,
         wantsNoOpener = windowFeatures.wantsNoOpener()
     ] (RefPtr<WebPageProxy> newPage) mutable {
+
+#if PLATFORM(MAC)
+        openerInfoOfPageBeingOpened() = std::nullopt;
+#endif
+
         m_isCallingCreateNewPage = false;
         if (!newPage) {
             reply(std::nullopt, std::nullopt);
@@ -8439,6 +8458,11 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
         configuration->setBrowsingContextGroup(BrowsingContextGroup::create());
         configuration->setOpenedSite(WebCore::Site(request.url()));
     }
+
+#if PLATFORM(MAC)
+    if (WTF::MacApplication::isSafari())
+        openerInfoOfPageBeingOpened() = configuration->openerInfo();
+#endif
 
     trySOAuthorization(configuration.copyRef(), WTFMove(navigationAction), *this, WTFMove(completionHandler), [this, protectedThis = Ref { *this }, configuration] (Ref<API::NavigationAction>&& navigationAction, CompletionHandler<void(RefPtr<WebPageProxy>&&)>&& completionHandler) mutable {
         m_isCallingCreateNewPage = true;
