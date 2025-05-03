@@ -114,16 +114,6 @@ static NSArray<NSHTTPCookie *> *cookiesBySettingPartition(NSArray<NSHTTPCookie *
     }
     return partitionedCookies.get();
 }
-
-static NSArray<NSHTTPCookie *> *cookiesByFilteringUnpartitionedCookies(NSArray<NSHTTPCookie *> *cookies)
-{
-    RetainPtr filteredCookies = adoptNS([[NSMutableArray alloc] initWithCapacity:cookies.count]);
-    for (NSHTTPCookie *cookie in cookies) {
-        if (cookie._storagePartition)
-            [filteredCookies addObject:cookie];
-    }
-    return filteredCookies.autorelease();
-}
 #endif
 
 // FIXME: Temporary fix for <rdar://60089022> and <rdar://100500464> until content can be updated.
@@ -161,10 +151,7 @@ void NetworkTaskCocoa::setCookieTransformForThirdPartyRequest(const WebCore::Res
     ASSERT_UNUSED(isRedirect, !task()._cookieTransformCallback || isRedirect == IsRedirect::Yes);
     task()._cookieTransformCallback = nil;
 
-    bool shouldAllowOnlyPartitioned = requestThirdPartyCookieBlockingDecision(request) == WebCore::ThirdPartyCookieBlockingDecision::AllExceptPartitioned;
-    bool needsPartitionedCookiesQuirk = Quirks::needsPartitionedCookies(request);
-
-    if (!needsPartitionedCookiesQuirk && !shouldAllowOnlyPartitioned)
+    if (!Quirks::needsPartitionedCookies(request))
         return;
 
     CheckedPtr networkStorageSession = m_networkSession->networkStorageSession();
@@ -179,7 +166,6 @@ void NetworkTaskCocoa::setCookieTransformForThirdPartyRequest(const WebCore::Res
     task()._cookieTransformCallback = makeBlockPtr([
         requestURL = crossThreadCopy(request.url())
         , weakTask = WeakObjCPtr<NSURLSessionTask>(task())
-        , needsPartitionedCookiesQuirk
         , cookiePartition = crossThreadCopy(cookiePartition)]
         (NSArray<NSHTTPCookie*> *cookiesSetInResponse) -> NSArray<NSHTTPCookie*> * {
         auto task = weakTask.get();
@@ -187,10 +173,8 @@ void NetworkTaskCocoa::setCookieTransformForThirdPartyRequest(const WebCore::Res
             return cookiesSetInResponse;
 
         // FIXME: Consider making these session cookies, as well.
-        if (needsPartitionedCookiesQuirk && !cookiePartition.isEmpty())
+        if (!cookiePartition.isEmpty())
             cookiesSetInResponse = cookiesBySettingPartition(cookiesSetInResponse, cookiePartition);
-        else
-            cookiesSetInResponse = cookiesByFilteringUnpartitionedCookies(cookiesSetInResponse);
 
         return cookiesSetInResponse;
     }).get();
@@ -392,8 +376,6 @@ void NetworkTaskCocoa::willPerformHTTPRedirection(WebCore::ResourceResponse&& re
         if (shouldBlockCookies(thirdPartyCookieBlockingDecision))
             blockCookies();
 #if HAVE(ALLOW_ONLY_PARTITIONED_COOKIES)
-        else if (thirdPartyCookieBlockingDecision == WebCore::ThirdPartyCookieBlockingDecision::AllExceptPartitioned)
-            blockCookies();
         else {
             RetainPtr<NSMutableURLRequest> mutableRequest = adoptNS([request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody) mutableCopy]);
             if (isOptInCookiePartitioningEnabled() && [mutableRequest respondsToSelector:@selector(_setAllowOnlyPartitionedCookies:)]) {
