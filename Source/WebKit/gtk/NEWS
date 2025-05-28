@@ -1,4 +1,16 @@
 ================
+WebKitGTK 2.48.3
+================
+
+What's new in WebKitGTK 2.48.3?
+
+  - Fix a crash introduced by the new threaded rendering implementation using Skia API.
+  - Improve rendering performance by recording layers once and replaying every dirty
+    region in different worker threads.
+  - Fix a crash when setting WEBKIT_SKIA_GPU_PAINTING_THREADS=0.
+  - Fix a reference cycle in webkitmediastreamsrc preventing its disposal.
+
+================
 WebKitGTK 2.48.2
 ================
 
