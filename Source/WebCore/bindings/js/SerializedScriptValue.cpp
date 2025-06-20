@@ -4281,6 +4281,8 @@ private:
     template<class T>
     JSValue getJSValue(T&& nativeObj)
     {
+        if (!m_isDOMGlobalObject)
+            return { };
         return toJS(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), std::forward<T>(nativeObj));
     }
 
@@ -4300,6 +4302,8 @@ private:
         if (!read(w))
             return { };
 
+        if (!m_isDOMGlobalObject)
+            return { };
         return toJSNewlyCreated(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), T::create(x, y, z, w));
     }
 
@@ -4331,6 +4335,8 @@ private:
                 return { };
 
             TransformationMatrix matrix(m11, m12, m21, m22, m41, m42);
+            if (!m_isDOMGlobalObject)
+                return { };
             return toJSNewlyCreated(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), T::create(WTFMove(matrix), DOMMatrixReadOnly::Is2D::Yes));
         } else {
             double m11;
@@ -4383,6 +4389,8 @@ private:
                 return { };
 
             TransformationMatrix matrix(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
+            if (!m_isDOMGlobalObject)
+                return { };
             return toJSNewlyCreated(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), T::create(WTFMove(matrix), DOMMatrixReadOnly::Is2D::No));
         }
     }
@@ -4403,6 +4411,8 @@ private:
         if (!read(height))
             return { };
 
+        if (!m_isDOMGlobalObject)
+            return { };
         return toJSNewlyCreated(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), T::create(x, y, width, height));
     }
 
@@ -4436,6 +4446,8 @@ private:
         if (!p4)
             return JSValue();
 
+        if (!m_isDOMGlobalObject)
+            return { };
         return toJSNewlyCreated(m_lexicalGlobalObject, jsCast<JSDOMGlobalObject*>(m_globalObject), DOMQuad::create(p1.value(), p2.value(), p3.value(), p4.value()));
     }
 
