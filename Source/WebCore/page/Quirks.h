@@ -40,6 +40,7 @@ class EventTarget;
 class EventTypeInfo;
 class HTMLElement;
 class HTMLVideoElement;
+class KeyframeEffect;
 class LayoutUnit;
 class LocalFrame;
 class Node;
@@ -249,6 +250,8 @@ public:
     WEBCORE_EXPORT bool needsNowPlayingFullscreenSwapQuirk() const;
 
     bool needsWebKitMediaTextTrackDisplayQuirk() const;
+
+    bool shouldPreventKeyframeEffectAcceleration(const KeyframeEffect&) const;
 
 private:
     bool needsQuirks() const;

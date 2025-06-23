@@ -49,6 +49,7 @@
 #include "HTMLTextAreaElement.h"
 #include "HTMLVideoElement.h"
 #include "JSEventListener.h"
+#include "KeyframeEffect.h"
 #include "LayoutUnit.h"
 #include "LocalDOMWindow.h"
 #include "LocalFrameView.h"
@@ -1804,6 +1805,16 @@ bool Quirks::needsWebKitMediaTextTrackDisplayQuirk() const
     return needsQuirks() && m_quirksData.needsWebKitMediaTextTrackDisplayQuirk;
 }
 
+// rdar://106770785
+bool Quirks::shouldPreventKeyframeEffectAcceleration(const KeyframeEffect& effect) const
+{
+    if (!needsQuirks() || !m_quirksData.isEA)
+        return false;
+
+    auto target = Ref { effect }->targetStyleable();
+    return target && Ref { target->element }->localName() == "ea-network-nav"_s;
+}
+
 URL Quirks::topDocumentURL() const
 {
     if (UNLIKELY(!m_topDocumentURLForTesting.isEmpty()))
@@ -2265,6 +2276,16 @@ static void handleESPNQuirks(QuirksData& quirksData, const URL& quirksURL, const
     // espn.com rdar://problem/73227900
     quirksData.shouldDisableEndFullscreenEventWhenEnteringPictureInPictureFromFullscreenQuirk = true;
 #endif
+}
+
+static void handleEAQuirks(QuirksData& quirksData, const URL& quirksURL, const String& quirksDomainString, const URL& documentURL)
+{
+    if (quirksDomainString != "ea.com"_s)
+        return;
+
+    UNUSED_PARAM(quirksURL);
+    UNUSED_PARAM(documentURL);
+    quirksData.isEA = true;
 }
 
 static void handleGoogleQuirks(QuirksData& quirksData, const URL& quirksURL, const String& quirksDomainString, const URL& documentURL)
@@ -2731,6 +2752,7 @@ void Quirks::determineRelevantQuirks()
 #if ENABLE(DESKTOP_CONTENT_MODE_QUIRKS)
         { "disneyplus"_s, &handleDisneyPlusQuirks },
 #endif
+        { "ea"_s, &handleEAQuirks },
         { "espn"_s, &handleESPNQuirks },
         { "facebook"_s, &handleFacebookQuirks },
 #if ENABLE(VIDEO_PRESENTATION_MODE)

@@ -32,6 +32,7 @@ struct WEBCORE_EXPORT QuirksData {
     bool isBankOfAmerica { false };
     bool isBing { false };
     bool isCBSSports { false };
+    bool isEA { false };
     bool isESPN { false };
     bool isFacebook { false };
     bool isGoogleDocs { false };
