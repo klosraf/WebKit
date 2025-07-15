@@ -124,7 +124,7 @@ static void* xmlMallocHelper(size_t size)
 
 static void xmlFreeHelper(void* p)
 {
-    xmlFree(p);
+    ::xmlFree(p);
 }
 
 struct XMLMalloc {
