@@ -1,4 +1,26 @@
 =================
+WPE WebKit 2.48.4
+=================
+
+What's new in WPE WebKit 2.48.4?
+
+  - Improve emoji font selection with USE_SKIA=ON.
+  - Improve playback of multimedia streams from blob URLs.
+  - Integrate with the system logging service on Android, allowing
+    configuring the overall log level and log channels using the
+    log.tag.WPEWebKit and debug.log.WPEWebKit system properties.
+  - Fall back to display-wide DMA-BUF formats when failing to get
+    the preferred formats for a given WPEToplevel.
+  - Fall back to using libdrm to detect device nodes to use in the
+    WPEPlatform headless and Wayland backends.
+  - Fix WebGL initialization when using WPEPlatform in some setups
+    i.e. Mali GPUs with the proprietary driver.
+  - Fix the build with USE_SKIA_OPENTYPE_SVG=ON and
+    USE_SYSPROF_CAPTURE=ON.
+  - Fix the build on LoongArch with USE_SKIA=ON.
+  - Fix several crashes and rendering issues.
+
+=================
 WPE WebKit 2.48.3
 =================
 
